@@ -57,5 +57,5 @@ rio/
 ├── LICENSE        # GNU General Public License v3
 ├── linker.ld      # Linker script mapping sections to the RAM base address
 ├── Makefile       # Build rules and QEMU execution targets
-└── README         # Project documentation and setup instructions
+└── README.md      # Project documentation and setup instructions
 ```
