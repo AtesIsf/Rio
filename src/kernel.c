@@ -6,9 +6,9 @@
 #include "kprint.h"
 
 void kmain(void) {
-    kputs("-----");
-    kputs(" RIO");
-    kputs("-----");
+    kputs("----------------");
+    kputs(" Welcome to RIO");
+    kputs("----------------");
 
 	return;
 }
