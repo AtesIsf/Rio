@@ -190,6 +190,7 @@ void kvprintf(const char *format, va_list arg) {
                     kputc('%');
                     kputc(*format);
             }
+            format++;
         } else {
             kputc(*format++);
         }
