@@ -44,6 +44,7 @@ status_code kputs(const char *str) {
         kputc(*c);
         c++;
     }
+    kputc('\n');
 
     return OK;
 }
