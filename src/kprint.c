@@ -11,7 +11,7 @@
 #include "ktypes.h"
 
 // The 16550A UART serial port lives here (for printing text).
-static unsigned char *uart = (unsigned char *) 0x10000000; 
+static unsigned char *uart = UART_ADDR; 
 
 /**
  * Prints the given character to the 16550A UART port.
