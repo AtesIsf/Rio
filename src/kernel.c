@@ -10,5 +10,7 @@ void kmain(void) {
     kputs(" Welcome to RIO");
     kputs("----------------");
 
+    kputs("Entered S-mode");
+
 	return;
 }

@@ -29,11 +29,29 @@ bss_clear:
 	addi t5, t5, 8
 	bltu t5, t6, bss_clear
 	
-	la t0, kmain
-	csrw mepc, t0
-	
-	/* Jump to kernel! */
-	tail kmain
+    /* give S/U modes full RAM access */
+    li t0, 0x3fffffffffffff
+    csrw pmpaddr0, t0
+    li t0, 0x0f
+    csrw pmpcfg0, t0
+
+    /* let s-mode handle interrupts */
+    li t0, 0xffff
+    csrw medeleg, t0
+    csrw mideleg, t0
+
+    /* set mstatus.MPP to S-mode */
+    csrr t0, mstatus
+    li t1, ~(3 << 11)
+    and t0, t0, t1
+    li t1, (1 << 11)
+    or t0, t0, t1
+    csrw mstatus, t0
+
+    /* set mepc and jump with mret */
+    la t0, kmain
+    csrw mepc, t0
+    mret
 	
 	.cfi_endproc
 
