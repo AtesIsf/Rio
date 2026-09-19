@@ -1,0 +1,56 @@
+# Build outputs and directories
+/bin/*
+!/bin/.gitkeep
+/build/
+/out/
+/target/
+
+# Kernel images, executables, and binaries
+*.elf
+*.bin
+*.img
+*.iso
+*.out
+rio.elf
+
+# Object and library files
+*.o
+*.obj
+*.a
+*.so
+
+# Dependency and linker map files
+*.d
+*.map
+*.sym
+*.lst
+
+# Disassembly and debug dumps
+*.dump
+*.dis
+
+# Emulation and debugging (QEMU, GDB)
+qemu.log
+trace-*
+.gdb_history
+gdb.txt
+core
+core.*
+
+# Language server and compilation database
+compile_commands.json
+.cache/
+.clangd/
+.ccls-cache/
+
+# Editor and IDE configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.#*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
