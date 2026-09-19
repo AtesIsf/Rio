@@ -50,7 +50,11 @@ rio/
 ├── bin/           # Output directory for compiled object files (.o)
 ├── src/
 │   ├── boot.s     # Assembly startup code (entry point, stack setup, BSS clear)
-│   └── kernel.c   # Main kernel implementation and UART communication
+│   ├── kernel.c   # Main kernel entry point (kmain)
+│   ├── kprint.c   # Kernel printing functions and UART communication
+│   ├── kprint.h   # Header declarations for kernel printing functions
+│   └── ktypes.h   # Kernel type definitions, limits, and status codes
+├── LICENSE        # GNU General Public License v3
 ├── linker.ld      # Linker script mapping sections to the RAM base address
 ├── Makefile       # Build rules and QEMU execution targets
 └── README         # Project documentation and setup instructions
