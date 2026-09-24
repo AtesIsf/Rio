@@ -27,7 +27,7 @@ Package details:
 The provided Makefile contains three primary targets:
 
 - `make` or `make build`:
-Build the operating system binary into a file called "rio.elf"
+Build the operating system binary into a file called `rio.elf`.
 
 ```bash
 make build
