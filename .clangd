@@ -1,0 +1,14 @@
+CompileFlags:
+  Add:
+    - --target=riscv64-unknown-elf
+    - -mcmodel=medany
+    - -ffreestanding
+    - -std=c23
+    - -Isrc
+
+---
+If:
+  PathMatch: .*\.h
+CompileFlags:
+  Add:
+    - -xc-header
