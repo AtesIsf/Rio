@@ -13,12 +13,27 @@ typedef status_code process;
 typedef status_code syscall;
 
 // process states
-#define PROC_CURR (0)
-#define PROC_READY (1)
-#define PROC_SLEEP (2)
-#define PROC_WAIT (3)
+#define PROC_CURR   (0)
+#define PROC_READY  (1)
+#define PROC_SLEEP  (2)
+#define PROC_WAIT   (3)
+#define PROC_EMPTY  (4)
 
 // Process table
+
+// id = index
+struct ProcessTableEntry {
+    byte state;
+    const char *name;
+};
+
+extern struct ProcessTableEntry g_process_table[N_PROCS];
+
+// function prototypes
+
+void process_table_init();
+
+process null_process();
 
 // macros
 
