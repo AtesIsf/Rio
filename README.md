@@ -53,16 +53,20 @@ make clean
 ## Project Structure
 
 ```text
-    rio/
-├── bin/           # Output directory for compiled object files (.o)
-    ├── src/
-    │   ├── boot.s     # Assembly startup code
-│   ├── kernel.c   # Main kernel entry point (kmain)
-    │   ├── kprint.c   # Kernel printing functions and UART communication
-    │   ├── kprint.h   # Header declarations for kernel printing functions
-    │   └── ktypes.h   # Kernel type definitions, limits, and status codes
-    ├── LICENSE        # GNU General Public License v3
-    ├── linker.ld      # Linker script mapping sections to the RAM base address
-    ├── Makefile       # Build rules and QEMU execution targets
-    └── README.md      # Project documentation and setup instructions
-    ```
+rio/
+├── bin/             # Output directory for compiled object files (.o)
+├── src/
+│   ├── boot.s       # Assembly startup code
+│   ├── kernel.c     # Main kernel entry point (kmain)
+│   ├── kprint.c     # Kernel printing functions and UART communication
+│   ├── kprint.h     # Header declarations for kernel printing functions
+│   ├── ktypes.h     # Kernel type definitions, limits, and status codes
+│   ├── process.c    # Process table management and null process
+│   ├── process.h    # Process table structures, states, and prototypes
+│   ├── schedqueue.c # Scheduler ready queue operations (enqueue, dequeue)
+│   └── schedqueue.h # Scheduler ready queue definitions and prototypes
+├── LICENSE          # GNU General Public License v3
+├── linker.ld        # Linker script mapping sections to the RAM base address
+├── Makefile         # Build rules and QEMU execution targets
+└── README.md        # Project documentation and setup instructions
+```
