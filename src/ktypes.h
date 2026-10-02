@@ -19,6 +19,7 @@ typedef __UINT32_TYPE__ uint32;
 typedef __UINT64_TYPE__ uint64; 
 
 typedef uint8 byte;
+typedef int32 pid;
 #define NULL ((void *) 0x0)
 
 // type limits

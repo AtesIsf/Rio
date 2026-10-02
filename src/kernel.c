@@ -4,6 +4,7 @@
  */
 
 #include "kprint.h"
+#include "schedqueue.h"
 
 void kmain(void) {
     kputs("----------------");
@@ -11,6 +12,8 @@ void kmain(void) {
     kputs("----------------");
 
     kputs("Entered S-mode");
+    sched_queue_init();
+    kputs("Initialized scheduler queue...");
 
 	return;
 }
