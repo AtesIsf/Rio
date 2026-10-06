@@ -2,8 +2,13 @@
 
 An operating system for the RISC-V architecture.
 
-Using "Operating System Design: The Xinu Approach" by Douglar Comer, my
-professor for CS354: Operating Systems at Purdue University as a guide.
+Using the following textbooks as guides: 
+
+* "Operating System Design: The Xinu Approach" by Douglar Comer, my
+professor for CS354: Operating Systems at Purdue University.
+
+* "xv6: a simple, Unix-like teaching operating system" by Russ Cox, Frans
+Kaashoek, and Rober Morris.
 
 ## Installation (Arch Linux)
 
