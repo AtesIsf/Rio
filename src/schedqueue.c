@@ -9,6 +9,11 @@
 
 struct SchedQueueEntry g_sched_queue[N_PROCS + 2];
 
+/**
+ * Must be called after process_table_init() as it needs an initialized
+ * NULL process.
+ */
+
 void sched_queue_init() {
     g_sched_queue[SCHED_QUEUE_HEAD].next = SCHED_QUEUE_TAIL;
     g_sched_queue[SCHED_QUEUE_HEAD].prev = SCHED_QUEUE_NULL;
@@ -17,6 +22,9 @@ void sched_queue_init() {
     g_sched_queue[SCHED_QUEUE_TAIL].prev = SCHED_QUEUE_HEAD;
     g_sched_queue[SCHED_QUEUE_TAIL].next = SCHED_QUEUE_NULL;
     g_sched_queue[SCHED_QUEUE_TAIL].priority = INT32_MIN;
+
+    // the NULL process has the lowest possible priority outside the tail
+    sched_queue_enqueue(0, INT32_MIN + 1);
 }
 
 bool sched_queue_includes(pid id) {
