@@ -4,9 +4,13 @@
 # void cswtch(struct Context *prev, struct Context *next)
 # save into prev, load from next
 
+# Only callee-saved registers are saved here because the RISC-V
+# convention states that if a non-callee register must be saved, the
+# compiler must store those variables in the stack
+
 .globl cswtch
 cswtch:
-    // *((*prev) + offset) = register
+    # *((*prev) + offset) = register
     sd ra, 0(a0) 
     sd sp, 8(a0) 
     sd s0, 16(a0) 
@@ -22,7 +26,7 @@ cswtch:
     sd s10, 96(a0) 
     sd s11, 104(a0) 
 
-    // register = *((*next) + offset)
+    # register = *((*next) + offset)
     ld ra, 0(a1) 
     ld sp, 8(a1) 
     ld s0, 16(a1) 
@@ -38,5 +42,7 @@ cswtch:
     ld s10, 96(a1) 
     ld s11, 104(a1) 
 
+    # the new return address is the ra that comes from the next
+    # Context. thus, this function simply returns to the next proc
     ret
 
