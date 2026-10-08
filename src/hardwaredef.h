@@ -10,10 +10,11 @@
 
 // Inspired by xv6-riscv. It defines the 64-bit registers for context switches
 struct Context {
-    uint64 ra;
-    uint64 sp;
+    uint64 ra; // return address
+    uint64 sp; // stack pointer
 
-    uint64 s0;
+    // s registers are saved in risc-v
+    uint64 s0; // frame pointer
     uint64 s1;
     uint64 s2;
     uint64 s3;
