@@ -86,6 +86,8 @@ syscall sched_queue_enqueue(pid id, int32 priority) {
     g_sched_queue[id].prev = prev_entry;
     g_sched_queue[id].next = curr;
 
+    g_sched_queue[id].priority = priority;
+
     return OK;
 }
 
