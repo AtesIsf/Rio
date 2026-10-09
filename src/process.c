@@ -1,5 +1,4 @@
 #include "process.h"
-#include "create.h"
 #include "kprint.h"
 #include "schedqueue.h"
 
@@ -10,13 +9,10 @@
 struct ProcessTableEntry g_process_table[N_PROCS];
 
 void process_table_init() {
-    for (int32 i = 0; i < N_PROCS; i++) {
+    for (int32 i = 1; i < N_PROCS; i++) {
         g_process_table[i].state = PROC_EMPTY;
         g_process_table[i].name = "";
     }
-
-    // this should result in NULL pid = 0
-    resume(create(null_process, 1, "NULL", 0));
 }
 
 /**
@@ -53,12 +49,5 @@ int32 get_valid_pid() {
     }
 
     return curr;
-}
-
-process null_process() {
-    // TODO: You may define a debug flag and remove this unless debugging
-    kputs("NULL Process");
-    while (true);
-    return OK;
 }
 

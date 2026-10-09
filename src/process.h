@@ -42,8 +42,6 @@ syscall resume(pid id);
 
 int32 get_valid_pid();
 
-process null_process();
-
 // macros
 
 #define validpid(x) (x < N_PROCS && x >= 0)

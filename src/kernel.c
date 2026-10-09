@@ -11,7 +11,7 @@
 
 /**
  * Entry point for Rio, initializes necessary structs and calls the
- * main process.
+ * main process. Also serves as the NULL process afterwards.
  */
 
 void __kentry(void) {
@@ -20,6 +20,8 @@ void __kentry(void) {
 
     // the main process will have priority 64
     resume(create(kmain, 64, "kmain", 0));
-
     yield();
+
+    // this basically also becomes the NULL process
+    while (true);
 }
