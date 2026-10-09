@@ -38,6 +38,8 @@ extern struct ProcessTableEntry g_process_table[N_PROCS];
 
 void process_table_init();
 
+syscall resume(pid id);
+
 int32 get_valid_pid();
 
 process null_process();

@@ -61,7 +61,8 @@ syscall sched_queue_dequeue(pid *id) {
 /**
  * Inserts the given process with the given priority into the
  * scheduler queue. Returns ERR if the process is already in the
- * queue or if the pid is invalid, returns OK otherwise.
+ * queue or if the pid is invalid, returns OK otherwise. Does not modify
+ * process state on the process table!
  */
 syscall sched_queue_enqueue(pid id, int32 priority) {
     if (!validpid(id) || sched_queue_includes(id)) {

@@ -1,4 +1,6 @@
 #include "process.h"
+#include "create.h"
+#include "schedqueue.h"
 
 /**
  * process_table_init() must be called on startup!
@@ -7,15 +9,35 @@
 struct ProcessTableEntry g_process_table[N_PROCS];
 
 void process_table_init() {
-    // maybe can remove this line later
-    g_process_table[0].state = PROC_READY;
-    g_process_table[0].name = "NULL";
-
-    // skip 0 -> null process
-    for (int32 i = 1; i < N_PROCS; i++) {
+    for (int32 i = 0; i < N_PROCS; i++) {
         g_process_table[i].state = PROC_EMPTY;
         g_process_table[i].name = "";
     }
+
+    // this should result in NULL pid = 0
+    resume(create(null_process, INT32_MIN + 1, "NULL", 0));
+}
+
+/**
+ * Enqueues a process into the ready list. Returns OK on success and ERR on
+ * error.
+ */
+
+syscall resume(pid id) {
+    // TODO: disable interrupts after you implement it
+
+    if (!validpid(id)) {
+        return ERR;
+    }
+
+    status_code code = sched_queue_enqueue(id, g_process_table[id].priority);
+    if (code == ERR) {
+        return ERR;
+    }
+
+    g_process_table[id].state = PROC_READY;
+    
+    return OK;
 }
 
 int32 get_valid_pid() {
