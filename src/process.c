@@ -18,6 +18,20 @@ void process_table_init() {
     }
 }
 
+int32 get_valid_pid() {
+    int32 curr = -1;
+
+    for (int32 i = 0; i < N_PROCS; i++) {
+        if (g_process_table[i].state != PROC_EMPTY) {
+            continue;
+        }
+        curr = i;
+        break;
+    }
+
+    return curr;
+}
+
 process null_process() {
     while (true);
     return OK;

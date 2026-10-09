@@ -13,18 +13,20 @@ typedef status_code process;
 typedef status_code syscall;
 
 // process states
-#define PROC_CURR   (0)
-#define PROC_READY  (1)
-#define PROC_SLEEP  (2)
-#define PROC_WAIT   (3)
-#define PROC_EMPTY  (4)
+#define PROC_CURR   (0) // current running proc
+#define PROC_READY  (1) // in ready list
+#define PROC_SLEEP  (2) // sleeping
+#define PROC_WAIT   (3) // waiting on a semaphore
+#define PROC_EMPTY  (4) // unused entry
+#define PROC_SUSP   (5) // suspended process
 
 // Process table
 
 // id = index
 struct ProcessTableEntry {
-    byte state;
     const char *name;
+    int32 priority;
+    byte state;
 };
 
 extern struct ProcessTableEntry g_process_table[N_PROCS];
@@ -32,6 +34,8 @@ extern struct ProcessTableEntry g_process_table[N_PROCS];
 // function prototypes
 
 void process_table_init();
+
+int32 get_valid_pid();
 
 process null_process();
 
