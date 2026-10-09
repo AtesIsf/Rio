@@ -18,7 +18,7 @@ first_run_wrapper:
     mv a7, s8
 
     # globally defined constant for the final return address of a proc
-    mv ra, PROC_END_RET
+    la ra, procend
 
     # this is where the actual frame pointer is
     jr s0

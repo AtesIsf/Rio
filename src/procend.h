@@ -3,6 +3,4 @@
 
 void procend();
 
-#define PROC_END_RET (procend)
-
 #endif
