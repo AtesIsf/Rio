@@ -1,5 +1,6 @@
 #include "process.h"
 #include "create.h"
+#include "kprint.h"
 #include "schedqueue.h"
 
 /**
@@ -55,6 +56,8 @@ int32 get_valid_pid() {
 }
 
 process null_process() {
+    // TODO: You may define a debug flag and remove this unless debugging
+    kputs("NULL Process");
     while (true);
     return OK;
 }
