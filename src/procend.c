@@ -7,4 +7,6 @@
 void procend() {
     // TODO: kill(get_currpid())
     kprintf("procend\n");
+    while (true);
 }
+
