@@ -4,43 +4,22 @@
  */
 
 #include "create.h"
-#include "kprint.h"
-#include "schedqueue.h"
+#include "kmain.h"
 #include "process.h"
+#include "schedqueue.h"
 #include "scheduler.h"
 
-process A() {
-    for (int32 i = 0; i < 10; i++) {
-        kputc('A');
-        yield();
-    }
-    return OK;
-}
+/**
+ * Entry point for Rio, initializes necessary structs and calls the
+ * main process.
+ */
 
-process B() {
-    for (int32 i = 0; i < 10; i++) {
-        kputc('B');
-        yield();
-    }
-    return OK;
-}
-
-void kmain(void) {
-    kputs("----------------");
-    kputs(" Welcome to RIO");
-    kputs("----------------");
-
-    kputs("Entered S-mode");
-
+void __kentry(void) {
     process_table_init();
-    kputs("Initialized process table...");
-
     sched_queue_init();
-    kputs("Initialized scheduler queue...");
 
-    resume(create(A, 10, "A", 0));
-    resume(create(B, 10, "B", 0));
+    // the main process will have priority 64
+    resume(create(kmain, 64, "kmain", 0));
 
     yield();
-	return;
 }

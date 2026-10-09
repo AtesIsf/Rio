@@ -49,7 +49,7 @@ bss_clear:
     csrw mstatus, t0
 
     /* set mepc and jump with mret */
-    la t0, kmain
+    la t0, __kentry
     csrw mepc, t0
     mret
 	

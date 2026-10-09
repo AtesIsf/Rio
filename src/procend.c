@@ -3,10 +3,13 @@
  */
 
 #include "kprint.h"
+#include "scheduler.h"
 
 void procend() {
     // TODO: kill(get_currpid())
-    kprintf("procend\n");
-    while (true);
+    g_process_table[curr_pid].state = PROC_EMPTY;
+    
+    kprintf("procend for pid: %d\n", curr_pid);
+    yield();
 }
 
