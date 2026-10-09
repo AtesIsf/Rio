@@ -59,19 +59,28 @@ make clean
 
 ```text
 rio/
-├── bin/             # Output directory for compiled object files (.o)
+├── bin/                  # Output directory for compiled object files (.o)
 ├── src/
-│   ├── boot.s       # Assembly startup code
-│   ├── kernel.c     # Main kernel entry point (kmain)
-│   ├── kprint.c     # Kernel printing functions and UART communication
-│   ├── kprint.h     # Header declarations for kernel printing functions
-│   ├── ktypes.h     # Kernel type definitions, limits, and status codes
-│   ├── process.c    # Process table management and null process
-│   ├── process.h    # Process table structures, states, and prototypes
-│   ├── schedqueue.c # Scheduler ready queue operations (enqueue, dequeue)
-│   └── schedqueue.h # Scheduler ready queue definitions and prototypes
-├── LICENSE          # GNU General Public License v3
-├── linker.ld        # Linker script mapping sections to the RAM base address
-├── Makefile         # Build rules and QEMU execution targets
-└── README.md        # Project documentation and setup instructions
+│   ├── boot.s            # Assembly startup code
+│   ├── create.c          # Process creation and stack initialization
+│   ├── create.h          # Process creation function prototypes
+│   ├── cswtch.s          # Assembly context switch routine
+│   ├── firstrunwrapper.s # Assembly wrapper for newly created processes
+│   ├── hardwaredef.h     # RISC-V hardware definitions and register context
+│   ├── kernel.c          # Main kernel entry point (kmain)
+│   ├── kprint.c          # Kernel printing functions and UART communication
+│   ├── kprint.h          # Header declarations for kernel printing functions
+│   ├── ktypes.h          # Kernel type definitions, limits, and status codes
+│   ├── memory.c          # Memory block allocation for process stacks and heap
+│   ├── memory.h          # Memory block allocator definitions and prototypes
+│   ├── procend.c         # Process termination and cleanup handler
+│   ├── procend.h         # Process termination handler prototypes
+│   ├── process.c         # Process table management and null process
+│   ├── process.h         # Process table structures, states, and prototypes
+│   ├── schedqueue.c      # Scheduler ready queue operations (enqueue, dequeue)
+│   └── schedqueue.h      # Scheduler ready queue definitions and prototypes
+├── LICENSE               # GNU General Public License v3
+├── linker.ld             # Linker script mapping sections to the RAM base address
+├── Makefile              # Build rules and QEMU execution targets
+└── README.md             # Project documentation and setup instructions
 ```
