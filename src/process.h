@@ -2,6 +2,7 @@
 #define PROCESS_H
 
 #include "ktypes.h"
+#include "hardwaredef.h"
 
 // constants
 
@@ -24,6 +25,8 @@ typedef status_code syscall;
 
 // id = index
 struct ProcessTableEntry {
+    struct Context ctx;
+    byte *stack_base;
     const char *name;
     int32 priority;
     byte state;
