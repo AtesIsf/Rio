@@ -15,7 +15,7 @@ void process_table_init() {
     }
 
     // this should result in NULL pid = 0
-    resume(create(null_process, INT32_MIN + 1, "NULL", 0));
+    resume(create(null_process, 1, "NULL", 0));
 }
 
 /**
