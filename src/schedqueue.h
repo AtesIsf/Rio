@@ -17,8 +17,8 @@ struct SchedQueueEntry {
 
 extern struct SchedQueueEntry g_sched_queue[N_PROCS + 2];
 
-#define SCHED_QUEUE_HEAD (N_PROCS - 2)
-#define SCHED_QUEUE_TAIL (N_PROCS - 1)
+#define SCHED_QUEUE_HEAD (N_PROCS + 1)
+#define SCHED_QUEUE_TAIL (N_PROCS)
 #define SCHED_QUEUE_NULL (-1)
 
 // function prototypes

@@ -31,7 +31,7 @@ bool sched_queue_includes(pid id) {
     if (!validpid(id)) return false;
 
     pid curr = SCHED_QUEUE_HEAD;
-    while (curr != SCHED_QUEUE_HEAD) {
+    while (curr != SCHED_QUEUE_TAIL) {
         if (curr == id) {
             return true;
         } 
