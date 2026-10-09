@@ -67,7 +67,9 @@ rio/
 │   ├── cswtch.s          # Assembly context switch routine
 │   ├── firstrunwrapper.s # Assembly wrapper for newly created processes
 │   ├── hardwaredef.h     # RISC-V hardware definitions and register context
-│   ├── kernel.c          # Main kernel entry point (kmain)
+│   ├── kernel.c          # Kernel entry point (__kentry) and null process loop
+│   ├── kmain.c           # Initial main process logic (kmain)
+│   ├── kmain.h           # Initial main process function prototype
 │   ├── kprint.c          # Kernel printing functions and UART communication
 │   ├── kprint.h          # Header declarations for kernel printing functions
 │   ├── ktypes.h          # Kernel type definitions, limits, and status codes
@@ -75,10 +77,12 @@ rio/
 │   ├── memory.h          # Memory block allocator definitions and prototypes
 │   ├── procend.c         # Process termination and cleanup handler
 │   ├── procend.h         # Process termination handler prototypes
-│   ├── process.c         # Process table management and null process
+│   ├── process.c         # Process table management and process resumption
 │   ├── process.h         # Process table structures, states, and prototypes
 │   ├── schedqueue.c      # Scheduler ready queue operations (enqueue, dequeue)
-│   └── schedqueue.h      # Scheduler ready queue definitions and prototypes
+│   ├── schedqueue.h      # Scheduler ready queue definitions and prototypes
+│   ├── scheduler.c       # Process scheduler implementation (yield)
+│   └── scheduler.h       # Scheduler declarations and context switch interface
 ├── LICENSE               # GNU General Public License v3
 ├── linker.ld             # Linker script mapping sections to the RAM base address
 ├── Makefile              # Build rules and QEMU execution targets
