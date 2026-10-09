@@ -5,14 +5,13 @@
 #include "process.h"
 
 #define BLOCK_SIZE (4096)
-#define N_BLOCKS (N_PROCS * 4)
+#define N_BLOCKS (N_PROCS * 2)
 
 #define MEM_FREE (0)
 #define MEM_ALLOC (1)
 
 struct MemBlock {
     byte state;
-    byte padding[15];
     byte data[BLOCK_SIZE];
 };
 
