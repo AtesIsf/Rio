@@ -1,5 +1,4 @@
 #include "process.h"
-#include "kprint.h"
 
 #include "memory.h"
 #include "schedqueue.h"
@@ -149,9 +148,6 @@ syscall kill(pid id) {
         return ERR;
     }
 
-    kprintf("[kill] killing process %d ('%s', state: %d)\n",
-            id, g_process_table[id].name, g_process_table[id].state);
-
     free_stack(g_process_table[id].stack_base);
 
     // TODO: update as more process states are defined
@@ -183,8 +179,6 @@ syscall kill(pid id) {
  */
 
 void procend() {
-    kprintf("[procend] process %d ('%s') completed, calling kill()\n",
-            curr_pid, g_process_table[curr_pid].name);
     kill(curr_pid);
 }
 
