@@ -62,8 +62,6 @@ rio/
 ├── bin/                  # Output directory for compiled object files (.o)
 ├── src/
 │   ├── boot.s            # Assembly startup code
-│   ├── create.c          # Process creation and stack initialization
-│   ├── create.h          # Process creation function prototypes
 │   ├── cswtch.s          # Assembly context switch routine
 │   ├── firstrunwrapper.s # Assembly wrapper for newly created processes
 │   ├── hardwaredef.h     # RISC-V hardware definitions and register context
@@ -75,11 +73,9 @@ rio/
 │   ├── ktypes.h          # Kernel type definitions, limits, and status codes
 │   ├── memory.c          # Memory block allocation for process stacks and heap
 │   ├── memory.h          # Memory block allocator definitions and prototypes
-│   ├── procend.c         # Process termination and cleanup handler
-│   ├── procend.h         # Process termination handler prototypes
-│   ├── process.c         # Process table management and process resumption
+│   ├── process.c         # Process management (create, resume, kill) and process table
 │   ├── process.h         # Process table structures, states, and prototypes
-│   ├── schedqueue.c      # Scheduler ready queue operations (enqueue, dequeue)
+│   ├── schedqueue.c      # Scheduler ready queue operations (enqueue, dequeue, remove)
 │   ├── schedqueue.h      # Scheduler ready queue definitions and prototypes
 │   ├── scheduler.c       # Process scheduler implementation (yield)
 │   └── scheduler.h       # Scheduler declarations and context switch interface
