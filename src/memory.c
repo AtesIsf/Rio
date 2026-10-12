@@ -30,7 +30,8 @@ byte *get_stack() {
 
 /**
  * Returns the data associated with the first free entry from the start.
- * Returns NULL if no suitable chunk is found.
+ * Returns NULL if no suitable chunk is found. Should be freed by the
+ * programmer afterwards!!!
  */
 
 byte *get_heap() {

@@ -10,6 +10,7 @@
 #define N_PROCS (64)
 #endif
 
+// always set to the current process's id
 extern pid curr_pid;
 
 typedef status_code process;
