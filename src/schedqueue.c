@@ -54,6 +54,9 @@ syscall sched_queue_dequeue(pid *id) {
     g_sched_queue[SCHED_QUEUE_HEAD].next = g_sched_queue[target].next;
     g_sched_queue[g_sched_queue[target].next].prev = SCHED_QUEUE_HEAD;
 
+    g_sched_queue[target].next = SCHED_QUEUE_NULL;
+    g_sched_queue[target].prev = SCHED_QUEUE_NULL;
+
     *id = target;
     
     return OK;
@@ -88,6 +91,35 @@ syscall sched_queue_enqueue(pid id, int32 priority) {
     g_sched_queue[id].next = curr;
 
     g_sched_queue[id].priority = priority;
+
+    return OK;
+}
+
+/**
+ * Removes given pid from the sched_queue. Created as a helper for kill.
+ */
+
+status_code sched_queue_remove(pid id) {
+    if (!validpid(id) || !sched_queue_includes(id)) {
+        return ERR;
+    }
+
+    pid curr = SCHED_QUEUE_HEAD;
+    // it is a given that the element exists due to the check above
+    while (curr != SCHED_QUEUE_TAIL) {
+        if (curr == id) {
+            pid prev = g_sched_queue[curr].prev;
+            pid next = g_sched_queue[curr].next;
+
+            g_sched_queue[prev].next = next;
+            g_sched_queue[next].prev = prev;
+
+            g_sched_queue[curr].next = SCHED_QUEUE_NULL;
+            g_sched_queue[curr].prev = SCHED_QUEUE_NULL;
+            break;
+        }
+        curr = g_sched_queue[curr].next;
+    }
 
     return OK;
 }

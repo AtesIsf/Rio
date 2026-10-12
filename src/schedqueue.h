@@ -31,6 +31,8 @@ syscall sched_queue_dequeue(pid *id);
 
 syscall sched_queue_enqueue(pid id, int32 priority);
 
+status_code sched_queue_remove(pid id);
+
 void sched_queue_debug();
 
 // macros

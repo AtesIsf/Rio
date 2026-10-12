@@ -10,6 +10,8 @@
 #define N_PROCS (64)
 #endif
 
+extern pid curr_pid;
+
 typedef status_code process;
 typedef status_code syscall;
 
@@ -38,7 +40,13 @@ extern struct ProcessTableEntry g_process_table[N_PROCS];
 
 void process_table_init();
 
+syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...);
+
 syscall resume(pid id);
+
+syscall kill(pid id);
+
+void procend();
 
 int32 get_valid_pid();
 
