@@ -25,6 +25,7 @@ void sched_queue_init() {
     g_sched_queue[SCHED_QUEUE_TAIL].priority = INT32_MIN;
 
     // the NULL process has the lowest possible priority outside the tail
+    g_process_table[0].priority = INT32_MIN + 1;
     sched_queue_enqueue(0, INT32_MIN + 1);
 }
 

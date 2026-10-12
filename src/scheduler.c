@@ -24,17 +24,17 @@ syscall yield() {
         return ERR;
     }
 
+    if (g_process_table[curr_pid].state != PROC_EMPTY) {
+        sched_queue_enqueue(curr_pid, g_process_table[curr_pid].priority);
+        g_process_table[curr_pid].state = PROC_READY;
+    }
+
     pid new_id;
     status_code ret_val = sched_queue_dequeue(&new_id);
     if (ret_val == ERR) {
         return ERR;
     }
     g_process_table[new_id].state = PROC_CURR;
-
-    if (g_process_table[curr_pid].state != PROC_EMPTY) {
-        sched_queue_enqueue(curr_pid, g_process_table[curr_pid].priority);
-        g_process_table[curr_pid].state = PROC_READY;
-    }
 
     struct Context *new_ctx = &g_process_table[new_id].ctx;
 
