@@ -3,7 +3,6 @@
  * Entry point for the RIO kernel
  */
 
-#include "create.h"
 #include "kmain.h"
 #include "process.h"
 #include "schedqueue.h"
