@@ -71,8 +71,8 @@ rio/
 │   ├── kprint.c          # Kernel printing functions and UART communication
 │   ├── kprint.h          # Header declarations for kernel printing functions
 │   ├── ktypes.h          # Kernel type definitions, limits, and status codes
-│   ├── memory.c          # Memory block allocation for process stacks and heap
-│   ├── memory.h          # Memory block allocator definitions and prototypes
+│   ├── memory.c          # Memory block allocation for process stacks and heap, and simple heap allocator (chef_malloc)
+│   ├── memory.h          # Memory block and heap allocator definitions and prototypes
 │   ├── process.c         # Process management (create, resume, kill) and process table
 │   ├── process.h         # Process table structures, states, and prototypes
 │   ├── schedqueue.c      # Scheduler ready queue operations (enqueue, dequeue, remove)
