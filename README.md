@@ -75,6 +75,7 @@ rio/
 │   ├── memory.h          # Memory block and heap allocator definitions and prototypes
 │   ├── process.c         # Process management (create, resume, kill) and process table
 │   ├── process.h         # Process table structures, states, and prototypes
+│   ├── rio.h             # Master header aggregating all project headers and common declarations
 │   ├── schedqueue.c      # Scheduler ready queue operations (enqueue, dequeue, remove)
 │   ├── schedqueue.h      # Scheduler ready queue definitions and prototypes
 │   ├── scheduler.c       # Process scheduler implementation (yield)
