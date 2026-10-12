@@ -134,6 +134,9 @@ syscall resume(pid id) {
     }
 
     g_process_table[id].state = PROC_READY;
+
+    // preserves the invariant
+    yield();
     
     return OK;
 }
