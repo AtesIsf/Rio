@@ -1,13 +1,4 @@
-#include "process.h"
-
-#include "memory.h"
-#include "schedqueue.h"
-#include "scheduler.h"
-
-#include <stdarg.h>
-
-// the cswtch() wrapper used by create
-extern void first_run_wrapper(void);
+#include "rio.h"
 
 /**
  * process_table_init() must be called on startup!

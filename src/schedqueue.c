@@ -4,9 +4,7 @@
  * All of these require the sched_queue_init() function be called first
  */
 
-#include "schedqueue.h"
-#include "kprint.h"
-#include "process.h"
+#include "rio.h"
 
 struct SchedQueueEntry g_sched_queue[N_PROCS + 2];
 

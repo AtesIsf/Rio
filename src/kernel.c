@@ -3,10 +3,7 @@
  * Entry point for the RIO kernel
  */
 
-#include "kmain.h"
-#include "process.h"
-#include "schedqueue.h"
-#include "scheduler.h"
+#include "rio.h"
 
 /**
  * Entry point for Rio, initializes necessary structs and calls the

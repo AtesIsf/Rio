@@ -1,6 +1,4 @@
-#include "scheduler.h"
-#include "hardwaredef.h"
-#include "schedqueue.h"
+#include "rio.h"
 
 pid curr_pid;
 

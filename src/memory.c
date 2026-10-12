@@ -2,7 +2,7 @@
  * Functions to allocate the stack memory needed by low-level processes
  */
 
-#include "memory.h"
+#include "rio.h"
 
 struct MemBlock g_memlist[N_BLOCKS];
 

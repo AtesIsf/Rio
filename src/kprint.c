@@ -6,9 +6,7 @@
  * Based on the OSdev wiki
  */
 
-#include "kprint.h"
-
-#include <stdarg.h>
+#include "rio.h"
 
 // The 16550A UART serial port lives here (for printing text).
 static unsigned char *uart = UART_ADDR; 
