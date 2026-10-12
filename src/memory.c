@@ -15,12 +15,14 @@ byte *get_stack() {
     byte *target = NULL;
     
     for (int32 i = N_BLOCKS - 1; i >= 0; i--) {
-        if (g_memlist[i].state == MEM_ALLOC) {
+        if (g_memlist[i].state != MEM_FREE) {
             continue;
         }
         target = (byte *) g_memlist[i].data;
         target += BLOCK_SIZE; // we need to return the top, not base
-        g_memlist[i].state = MEM_ALLOC;
+        g_memlist[i].state = MEM_STACK;
+        // this makes no sense for the stack but still
+        g_memlist[i].curr_end = g_memlist[i].data;
         break;
     }
     return target;
@@ -35,11 +37,12 @@ byte *get_heap() {
     byte *target = NULL;
     
     for (int32 i = 0; i < N_BLOCKS; i++) {
-        if (g_memlist[i].state == MEM_ALLOC) {
+        if (g_memlist[i].state != MEM_FREE) {
             continue;
         }
         target = (byte *) g_memlist[i].data;
-        g_memlist[i].state = MEM_ALLOC;
+        g_memlist[i].state = MEM_HEAP;
+        g_memlist[i].curr_end = g_memlist[i].data;
         break;
     }
     return target;
@@ -53,8 +56,7 @@ status_code free_stack(byte *addr) {
     if (addr == NULL) {
         return ERR;
     }
-    // this should be the state field of the entry
-    *(addr - BLOCK_SIZE - 16) = MEM_FREE;
+    ((struct MemBlock *) (addr - BLOCK_SIZE - 16))->state = MEM_FREE;
     return OK;
 }
 
@@ -66,5 +68,32 @@ status_code free_heap(byte *addr) {
         return ERR;
     }
     return free_stack(addr + BLOCK_SIZE);
+}
+
+/**
+ * Given the data section pointer of a heap block obtained by the
+ * low-level memory manager, allocates and returns a heap object of the
+ * requested size. Returns NULL on failure.
+ *
+ * Causes undefined behaviour if the passed block is a stack block!
+ */
+
+void *chef_malloc(byte *data, int32 size) {
+    if (data == NULL || size <= 0 
+        || ((struct MemBlock *) (data - 16))->state != MEM_HEAP) {
+        return NULL;
+    }
+
+    // round up to next multiple of 8
+    size = (size + 7) & (-8);
+    struct MemBlock *block = (struct MemBlock *) (data - 16);
+
+    byte *result = NULL;
+    if (block->curr_end + size <= &block->data[BLOCK_SIZE - 1]) {
+        result = block->curr_end;
+        block->curr_end += size;
+    }
+
+    return (void *) result;
 }
 
