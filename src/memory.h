@@ -4,7 +4,8 @@
 #include "ktypes.h"
 #include "process.h"
 
-#define BLOCK_SIZE (4096)
+// Each memory block is 4KiB, including state and padding
+#define BLOCK_SIZE (4096 - 16)
 #define N_BLOCKS (N_PROCS * 2)
 
 #define MEM_FREE (0)
@@ -12,6 +13,7 @@
 
 struct MemBlock {
     byte state;
+    byte padding[15]; // keeps data 16-byte aligned
     byte data[BLOCK_SIZE];
 };
 
