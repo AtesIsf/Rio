@@ -5,6 +5,7 @@
 
 // IWYU pragma: begin_exports
 #include "hardwaredef.h"
+#include "interrupt.h"
 #include "kmain.h"
 #include "kprint.h"
 #include "ktypes.h"
