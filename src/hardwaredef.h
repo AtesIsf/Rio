@@ -54,6 +54,13 @@ struct Context {
  * Supervisor mode, and controls to what mode sret returns to.
  */
 
+/* definitions from xv6 */
+#define SSTATUS_SPP  (1L << 8) // Previous mode, 1 = Supervisor, 0 = User
+#define SSTATUS_SPIE (1L << 5) // Supervisor Previous Interrupt Enable
+#define SSTATUS_UPIE (1L << 4) // User Previous Interrupt Enable
+#define SSTATUS_SIE  (1L << 1) // Supervisor Interrupt Enable
+#define SSTATUS_UIE  (1L << 0) // User Interrupt Enable
+
 // read the stvec register
 static inline uint64 read_stvec() {
     uint64 val;

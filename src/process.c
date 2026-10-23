@@ -19,20 +19,23 @@ void process_table_init() {
  */
 
 syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
-    // TODO: disable interrupts here after you implement it
+    intmask mask = interrupt_save();
 
     if (fn == NULL || priority < 1 || n_args < 0) {
+        interrupt_restore(mask);
         return ERR;
     }
 
     pid id = get_valid_pid();
     // no valid pid left
     if (id == -1) {
+        interrupt_restore(mask);
         return ERR;
     }
 
     byte *stk = get_stack();
     if (stk == NULL) {
+        interrupt_restore(mask);
         return ERR;
     }
     // already 16-byte aligned
@@ -104,6 +107,7 @@ syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
     g_process_table[id].priority = priority;
     g_process_table[id].state = PROC_SUSP;
 
+    interrupt_restore(mask);
     return id;
 }
 
@@ -113,14 +117,16 @@ syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
  */
 
 syscall resume(pid id) {
-    // TODO: disable interrupts after you implement it
+    intmask mask = interrupt_save();
 
     if (!validpid(id)) {
+        interrupt_restore(mask);
         return ERR;
     }
 
     status_code code = sched_queue_enqueue(id, g_process_table[id].priority);
     if (code == ERR) {
+        interrupt_restore(mask);
         return ERR;
     }
 
@@ -129,6 +135,7 @@ syscall resume(pid id) {
     // preserves the invariant
     yield();
     
+    interrupt_restore(mask);
     return OK;
 }
 
@@ -137,8 +144,10 @@ syscall resume(pid id) {
  */
 
 syscall kill(pid id) {
-    // TODO: disable interrupts after you implement it
+    intmask mask = interrupt_save();
+
     if (!validpid(id) || id == 0) { // can't be the NULL proc, so id != 0
+        interrupt_restore(mask);
         return ERR;
     }
 
@@ -165,6 +174,7 @@ syscall kill(pid id) {
             g_process_table[id].state = PROC_EMPTY;
     }
 
+    interrupt_restore(mask);
     return OK;
 }
 

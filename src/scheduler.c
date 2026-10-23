@@ -13,12 +13,13 @@ pid curr_pid;
  */
 
 syscall yield() {
-    // TODO: disable interrupts after implementing it
+    intmask mask = interrupt_save();
 
     // This could only happen if the queue isn't initialized or if the
     // NULL process has been removed for whatever reason (which should
     // never happen).
     if (sched_queue_empty()) {
+        interrupt_restore(mask);
         return ERR;
     }
 
@@ -30,6 +31,7 @@ syscall yield() {
     pid new_id;
     status_code ret_val = sched_queue_dequeue(&new_id);
     if (ret_val == ERR) {
+        interrupt_restore(mask);
         return ERR;
     }
     g_process_table[new_id].state = PROC_CURR;
@@ -42,6 +44,7 @@ syscall yield() {
 
     cswtch(&g_process_table[old_pid].ctx, new_ctx);
 
+    interrupt_restore(mask);
     return OK;
 }
 
