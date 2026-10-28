@@ -7,9 +7,33 @@
 /**
  * In RISC-V, there are 3 types of interrupts (traps):
  * 1) system call -> user program uses ecall instruction
- * 2) exception: illegal instruction
- * 3) device interrupt
+ * 2) exception: illegal instruction -> scause MSB = 0
+ * 3) device interrupt -> scause MSB = 1
  */
+
+// TODO: Add more later
+/* IRQ DEFINITIONS */
+#define IRQ_UNKNOWN (0)
+#define IRQ_TIMER   (1)
+#define IRQ_SYSCALL (2) // may have to define user syscall later!!!
+
+// TODO: May wanna define a better constant later. 8 is random
+/**
+ * Indexed by the IRQ
+ */
+extern void *interrupt_handler_table[8];
+
+/* function prototypes */
+
+status_code init_interrupt_table();
+
+irq get_irq();
+
+status_code handler_clock();
+
+status_code handler_syscall();
+
+/* inline functions from here */
 
 /**
  * Saves and returns the mask of the current interrupt state. Basically

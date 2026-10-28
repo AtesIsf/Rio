@@ -19,8 +19,9 @@ typedef __UINT32_TYPE__ uint32;
 typedef __UINT64_TYPE__ uint64; 
 
 typedef uint8 byte;
-typedef int32 pid;
+typedef int32 pid; // can't be unsigned, try and see the warnings if you want
 typedef uint64 intmask;
+typedef uint64 irq;
 #define NULL ((void *) 0x0)
 
 // type limits
