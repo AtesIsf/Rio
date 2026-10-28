@@ -99,6 +99,12 @@ The following flowchart illustrates how RIO's core OS abstractions interact with
 
 ```mermaid
 flowchart TD
+    subgraph Legend ["Legend"]
+        direction TB
+        L_SRC["Caller (Client / User)"] -->|"Solid: Direct Call / Flow"| L_DST["Callee (Provider / Service)"]
+        L_CTL["Initiator"] -.->|"Dashed: Critical Section Masking"| L_TGT["Target Subsystem"]
+    end
+
     subgraph Hardware ["Hardware Layer"]
         HW_TIMER["RISC-V Timer (stimecmp / time)"]
         HW_UART["16550 UART Serial"]
