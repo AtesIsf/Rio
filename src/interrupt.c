@@ -6,6 +6,7 @@ void interrupts_init() {
     interrupt_handler_table[0] = NULL;
     interrupt_handler_table[1] = handler_clock;
     write_stvec((uint64) dispatch_interrupt);
+    write_sstatus(SSTATUS_SIE);
 }
 
 /**
