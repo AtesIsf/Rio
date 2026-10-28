@@ -12,6 +12,7 @@
 
 void __kentry(void) {
     process_table_init();
+    lobby_init();
     semaphore_init();
     sched_queue_init();
     clock_init();

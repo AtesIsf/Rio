@@ -10,6 +10,7 @@
 #include <kmain.h>
 #include <kprint.h>
 #include <ktypes.h>
+#include <lobby.h>
 #include <memory.h>
 #include <process.h>
 #include <schedqueue.h>
