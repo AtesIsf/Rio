@@ -101,30 +101,38 @@ The following flowchart illustrates how RIO's core OS abstractions interact with
 flowchart TD
     subgraph Legend ["Legend"]
         direction TB
-        L_SRC["Caller (Client / User)"] -->|"Solid: Direct Call / Flow"| L_DST["Callee (Provider / Service)"]
-        L_CTL["Initiator"] -.->|"Dashed: Critical Section Masking"| L_TGT["Target Subsystem"]
+        L_SRC["Caller (User)"] -->|"Direct Call / Control"| L_DST["Callee (Used)"]
+        L_CTL["Caller (User)"] -.->|"Interrupt Masking"| L_TGT["Interrupts"]
     end
 
     subgraph Hardware ["Hardware Layer"]
-        HW_TIMER["RISC-V Timer (stimecmp / time)"]
+        HW_TIMER["RISC-V Timer (stimecmp)"]
         HW_UART["16550 UART Serial"]
     end
 
     subgraph Core ["Kernel Abstractions"]
+        direction TB
+        MEM["Memory Manager"]
+        PROC["Process Manager"]
         INT["Interrupt Manager"]
         SCHED["CPU Scheduler"]
-        PROC["Process Manager"]
-        MEM["Memory Manager"]
         CONSOLE["Console Driver"]
     end
 
-    subgraph Exec ["Execution"]
+    subgraph Exec [" "]
         TASKS["Active Processes (kmain, Tasks)"]
+        EXEC_LBL["Execution"]
+        TASKS ~~~ EXEC_LBL
     end
+    style EXEC_LBL fill:none,stroke:none,font-weight:bold
 
-    %% Preemption / Clock Flow
+    %% Pin Legend to Top-Left
+    Legend ~~~ Hardware
+
+    %% Preemption & Scheduling
     HW_TIMER -->|"Timer interrupt"| INT
     INT -->|"Triggers preemption (yield)"| SCHED
+    SCHED -->|"Restores context (cswtch)"| TASKS
 
     %% Concurrency & Critical Sections
     SCHED -.->|"Disables/restores interrupts"| INT
@@ -134,10 +142,9 @@ flowchart TD
     PROC -->|"Allocates / frees stacks"| MEM
     PROC -->|"Enqueues ready processes"| SCHED
 
-    %% Scheduling & Process Execution
-    SCHED -->|"Restores context (cswtch)"| TASKS
-    TASKS -->|"System calls (yield, resume, kill)"| PROC
-    TASKS -->|"Dynamic memory allocation"| MEM
-    TASKS -->|"Console output (kprintf, kputs)"| CONSOLE
+    %% Task Execution & I/O
+    TASKS -->|"System calls"| PROC
+    TASKS -->|"Dynamic memory"| MEM
+    TASKS -->|"Console output"| CONSOLE
     CONSOLE -->|"Transmits bytes"| HW_UART
 ```
