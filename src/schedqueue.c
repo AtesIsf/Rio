@@ -44,8 +44,9 @@ bool sched_queue_includes(pid id) {
 /**
  * Returns ERR if the queue is empty, OK otherwise. Removes and
  * places the pid of the head of the queue inside the given parameter.
+ * Should be called from with interrupts disabled.
  */
-syscall sched_queue_dequeue(pid *id) {
+status_code sched_queue_dequeue(pid *id) {
     if (sched_queue_empty()) return ERR;
 
     pid target = g_sched_queue[SCHED_QUEUE_HEAD].next;
@@ -65,9 +66,10 @@ syscall sched_queue_dequeue(pid *id) {
  * Inserts the given process with the given priority into the
  * scheduler queue. Returns ERR if the process is already in the
  * queue or if the pid is invalid, returns OK otherwise. Does not modify
- * process state on the process table!
+ * process state on the process table! Should be called with
+ * interrupts disabled
  */
-syscall sched_queue_enqueue(pid id, int32 priority) {
+status_code sched_queue_enqueue(pid id, int32 priority) {
     if (!validpid(id) || sched_queue_includes(id)) {
         return ERR;
     }
