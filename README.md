@@ -99,12 +99,6 @@ The following flowchart illustrates how RIO's core OS abstractions interact with
 
 ```mermaid
 flowchart TD
-    subgraph Legend ["Legend"]
-        direction TB
-        L_SRC["Caller (User)"] -->|"Direct Call / Control"| L_DST["Callee (Used)"]
-        L_CTL["Caller (User)"] -.->|"Interrupt Masking"| L_TGT["Interrupts"]
-    end
-
     subgraph Hardware ["Hardware Layer"]
         HW_TIMER["RISC-V Timer (stimecmp)"]
         HW_UART["16550 UART Serial"]
@@ -119,15 +113,9 @@ flowchart TD
         CONSOLE["Console Driver"]
     end
 
-    subgraph Exec [" "]
+    subgraph Exec ["Execution"]
         TASKS["Active Processes (kmain, Tasks)"]
-        EXEC_LBL["Execution"]
-        TASKS ~~~ EXEC_LBL
     end
-    style EXEC_LBL fill:none,stroke:none,font-weight:bold
-
-    %% Pin Legend to Top-Left
-    Legend ~~~ Hardware
 
     %% Preemption & Scheduling
     HW_TIMER -->|"Timer interrupt"| INT
