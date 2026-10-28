@@ -51,6 +51,7 @@ syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
     struct Context *ctx = &g_process_table[id].ctx;
     ctx->ra = (uint64) first_run_wrapper;
     ctx->sp = sp;
+    ctx->sstatus = INITIAL_PROCESS_SSTATUS;
     ctx->s0 = (uint64) fn;
     ctx->s1 = 0;
     ctx->s2 = 0;

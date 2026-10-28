@@ -8,10 +8,14 @@
  * what RISC-V expects. They are defined in this file.
  */
 
+// on first run, interrupts are enabled and the function returns to s-mode
+#define INITIAL_PROCESS_SSTATUS (SSTATUS_SIE | SSTATUS_SPP)
+
 // Inspired by xv6-riscv. It defines the 64-bit registers for context switches
 struct Context {
     uint64 ra; // return address
     uint64 sp; // stack pointer
+    uint64 sstatus; // interrupt flags, required since I use the Xinu system
 
     // s registers are saved in risc-v
     uint64 s0; // frame pointer
