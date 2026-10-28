@@ -55,50 +55,6 @@ Deletes all generated binary files
 make clean
 ```
 
-## Subsystem Architecture
-
-The following flowchart illustrates how RIO's core OS abstractions interact with each other:
-
-```mermaid
-flowchart TD
-    subgraph Hardware ["Hardware Layer"]
-        HW_TIMER["RISC-V Timer (stimecmp/time)"]
-        HW_UART["16550 UART"]
-    end
-
-    subgraph Core ["Kernel Subsystems"]
-        INT["Interrupt Subsystem"]
-        CLOCK["Hardware Clock Subsystem"]
-        SCHED["Scheduler Subsystem"]
-        PROC["Process Management Subsystem"]
-        MEM["Memory Management Subsystem"]
-        CONSOLE["Console I/O Subsystem"]
-    end
-
-    subgraph Exec ["Execution"]
-        TASKS["Running Processes (kmain, tasks)"]
-    end
-
-    %% Preemption / Clock Flow
-    HW_TIMER -->|"Timer interrupt"| INT
-    INT -->|"Dispatches clock tick"| CLOCK
-    CLOCK -->|"Re-arms deadline & yields"| SCHED
-
-    %% Concurrency & Critical Sections
-    SCHED -.->|"Disables/restores interrupts"| INT
-    PROC -.->|"Disables/restores interrupts"| INT
-
-    %% Process & Memory Interactions
-    PROC -->|"Allocates / frees stacks"| MEM
-    PROC -->|"Enqueues ready processes"| SCHED
-
-    %% Scheduling & Process Execution
-    SCHED -->|"cswtch (restores context)"| TASKS
-    TASKS -->|"Syscalls (yield, resume, kill)"| PROC
-    TASKS -->|"Kernel output (kprintf, kputs)"| CONSOLE
-    CONSOLE -->|"Transmits bytes"| HW_UART
-```
-
 ## Project Structure
 
 ```text
@@ -135,4 +91,47 @@ rio/
 ├── linker.ld                  # Linker script mapping sections to the RAM base address
 ├── Makefile                   # Build rules and QEMU execution targets
 └── README.md                  # Project documentation and setup instructions
+```
+
+## System Architecture
+
+The following flowchart illustrates how RIO's core OS abstractions interact with each other:
+
+```mermaid
+flowchart TD
+    subgraph Hardware ["Hardware Layer"]
+        HW_TIMER["RISC-V Timer (stimecmp / time)"]
+        HW_UART["16550 UART Serial"]
+    end
+
+    subgraph Core ["Kernel Abstractions"]
+        INT["Interrupt Manager"]
+        SCHED["CPU Scheduler"]
+        PROC["Process Manager"]
+        MEM["Memory Manager"]
+        CONSOLE["Console Driver"]
+    end
+
+    subgraph Exec ["Execution"]
+        TASKS["Active Processes (kmain, Tasks)"]
+    end
+
+    %% Preemption / Clock Flow
+    HW_TIMER -->|"Timer interrupt"| INT
+    INT -->|"Triggers preemption (yield)"| SCHED
+
+    %% Concurrency & Critical Sections
+    SCHED -.->|"Disables/restores interrupts"| INT
+    PROC -.->|"Disables/restores interrupts"| INT
+
+    %% Process & Memory Interactions
+    PROC -->|"Allocates / frees stacks"| MEM
+    PROC -->|"Enqueues ready processes"| SCHED
+
+    %% Scheduling & Process Execution
+    SCHED -->|"Restores context (cswtch)"| TASKS
+    TASKS -->|"System calls (yield, resume, kill)"| PROC
+    TASKS -->|"Dynamic memory allocation"| MEM
+    TASKS -->|"Console output (kprintf, kputs)"| CONSOLE
+    CONSOLE -->|"Transmits bytes"| HW_UART
 ```
