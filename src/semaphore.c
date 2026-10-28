@@ -4,8 +4,10 @@ struct SemEntry g_semaphores[N_SEM];
 
 void semaphore_init() {
     for (int32 i = 0; i < N_SEM; i++) {
+        g_semaphores[i].head = (struct LobbyEntry) {
+            .next = LOBBY_NULL, .delta = 0
+        };
         g_semaphores[i].count = 0;
-        g_semaphores[i].head = SEMQUEUE_NULL;
         g_semaphores[i].state = SEM_FREE;
     } 
 }

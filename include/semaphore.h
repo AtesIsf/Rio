@@ -1,6 +1,7 @@
 #ifndef SEMAPHORE_H
 #define SEMAPHORE_H
 
+#include <lobby.h>
 #include <ktypes.h>
 #include <process.h>
 
@@ -18,13 +19,9 @@
 #define SEM_USED (1)
 
 struct SemEntry {
+    struct LobbyEntry head;
     int32 count;
-    int32 head;
     int32 state;
-};
-
-struct SemQueueNode {
-    int32 next;
 };
 
 extern struct SemEntry g_semaphores[N_SEM];
