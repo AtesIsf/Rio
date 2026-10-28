@@ -66,66 +66,82 @@ struct Context {
 #define SCAUSE_TIMER    (0x8000000000000005L) // Supervisor timer interrupt
 #define SCAUSE_EXTERNAL (0x8000000000000009L) // Supervisor external interrupt
 
-/* CSRR READ/WRITE FUNCTIONS */
-
-// read the stvec register
 static inline uint64 read_stvec() {
     uint64 val;
     __asm__ volatile("csrr %0, stvec" : "=r"(val));
     return val;
 }
 
-// write to the stvec register
 static inline void write_stvec(uint64 val) {
     __asm__ volatile("csrw stvec, %0" : : "r"(val));
 }
 
-// read the sepc register
 static inline uint64 read_sepc() {
     uint64 val;
     __asm__ volatile("csrr %0, sepc" : "=r"(val));
     return val;
 }
 
-// write to the sepc register
 static inline void write_sepc(uint64 val) {
     __asm__ volatile("csrw sepc, %0" : : "r"(val));
 }
 
-// read the scause register
 static inline uint64 read_scause() {
     uint64 val;
     __asm__ volatile("csrr %0, scause" : "=r"(val));
     return val;
 }
 
-// write to the scause register
 static inline void write_scause(uint64 val) {
     __asm__ volatile("csrw scause, %0" : : "r"(val));
 }
 
-// read the sscratch register
 static inline uint64 read_sscratch() {
     uint64 val;
     __asm__ volatile("csrr %0, sscratch" : "=r"(val));
     return val;
 }
 
-// write to the sscratch register
 static inline void write_sscratch(uint64 val) {
     __asm__ volatile("csrw sscratch, %0" : : "r"(val));
 }
 
-// read the sstatus register
 static inline uint64 read_sstatus() {
     uint64 val;
     __asm__ volatile("csrr %0, sstatus" : "=r"(val));
     return val;
 }
 
-// write to the sstatus register
 static inline void write_sstatus(uint64 val) {
     __asm__ volatile("csrw sstatus, %0" : : "r"(val));
+}
+
+/**
+ * I used the xv6 textbook for these again. The definitions below are to
+ * use the hardware clock of risc-v.
+ *
+ * Registers for the hardware clock:
+ *
+ * **time**: contains the timer that the hardware increments in a steady rate.
+ * Understandably, there is no helper to write to this register
+ *
+ * **stimecmp**: contains the timestamp for the next clock interrupt
+ */
+
+static inline uint64 read_time() {
+    uint64 val;
+    __asm__ volatile("csrr %0, time" : "=r"(val));
+    return val;
+} 
+
+static inline uint64 read_stimecmp() {
+    uint64 val;
+    __asm__ volatile("csrr %0, stimecmp" : "=r"(val));
+    return val;
+}
+
+static inline void write_stimecmp(uint64 val) {
+    __asm__ volatile("csrw stimecmp, %0" : : "r"(val));
 }
 
 #endif
