@@ -1,8 +1,8 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include "ktypes.h"
-#include "hardwaredef.h"
+#include <ktypes.h>
+#include <hardwaredef.h>
 
 // constants
 

@@ -1,0 +1,5 @@
+--target=riscv64-unknown-elf
+-mcmodel=medany
+-ffreestanding
+-std=c23
+-Iinclude

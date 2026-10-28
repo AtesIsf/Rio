@@ -3,7 +3,7 @@
  * Entry point for the RIO kernel
  */
 
-#include "rio.h"
+#include <rio.h>
 
 /**
  * Entry point for Rio, initializes necessary structs and calls the

@@ -4,7 +4,7 @@
  * a main function for the kernel, but running as a process as well.
  */
 
-#include "rio.h"
+#include <rio.h>
 
 process kmain() {
     kputs("----------------");

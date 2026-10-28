@@ -1,4 +1,4 @@
-#include "rio.h"
+#include <rio.h>
 
 void clock_init() {
     // the permission setup in xv6 here is done in boot.s

@@ -4,16 +4,16 @@
 /* RIO Header Files */
 
 // IWYU pragma: begin_exports
-#include "clock.h"
-#include "hardwaredef.h"
-#include "interrupt.h"
-#include "kmain.h"
-#include "kprint.h"
-#include "ktypes.h"
-#include "memory.h"
-#include "process.h"
-#include "schedqueue.h"
-#include "scheduler.h"
+#include <clock.h>
+#include <hardwaredef.h>
+#include <interrupt.h>
+#include <kmain.h>
+#include <kprint.h>
+#include <ktypes.h>
+#include <memory.h>
+#include <process.h>
+#include <schedqueue.h>
+#include <scheduler.h>
 // IWYU pragma: end_exports
 
 /* Other Prototypes */

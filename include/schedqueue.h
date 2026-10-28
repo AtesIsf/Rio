@@ -1,8 +1,8 @@
 #ifndef SCHED_QUEUE_H
 #define SCHED_QUEUE_H
 
-#include "ktypes.h"
-#include "process.h"
+#include <ktypes.h>
+#include <process.h>
 
 // Ready process queue
 struct SchedQueueEntry {

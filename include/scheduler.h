@@ -1,9 +1,9 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include "hardwaredef.h"
-#include "ktypes.h"
-#include "process.h"
+#include <hardwaredef.h>
+#include <ktypes.h>
+#include <process.h>
 
 extern pid curr_pid;
 

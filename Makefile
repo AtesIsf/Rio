@@ -5,12 +5,13 @@ AS            := $(CROSS_COMPILE)as
 QEMU          := qemu-system-riscv64
 
 # Compilation and linking flags
-CFLAGS  ?= -Wall -Wextra -mcmodel=medany -ffreestanding
+CFLAGS  ?= -Wall -Wextra -mcmodel=medany -ffreestanding -I$(INC_DIR)
 LDFLAGS ?= -T $(LINKER_SCRIPT) -nostdlib
 LDLIBS  ?= -lgcc
 
 # Project directories and files
 SRC_DIR       := src
+INC_DIR       := include
 BIN_DIR       := bin
 LINKER_SCRIPT := linker.ld
 TARGET        := rio.elf

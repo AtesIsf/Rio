@@ -1,8 +1,8 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include "ktypes.h"
-#include "process.h"
+#include <ktypes.h>
+#include <process.h>
 
 // Each memory block is 4KiB, including state and padding
 #define BLOCK_SIZE (4096 - 16)

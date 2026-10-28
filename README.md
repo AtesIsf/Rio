@@ -60,31 +60,33 @@ make clean
 ```text
 rio/
 ├── bin/                       # Output directory for compiled object files (.o)
-├── src/
-│   ├── boot.s                 # Assembly startup code
-│   ├── clock.c                # Hardware clock initialization (clock_init)
+├── compile_flags.txt          # Compiler flags for clangd and language servers
+├── include/                   # Kernel header files
 │   ├── clock.h                # Hardware clock definitions and quantum constant
-│   ├── cswtch.s               # Assembly context switch routine
-│   ├── firstrunwrapper.s      # Assembly wrapper for newly created processes
 │   ├── hardwaredef.h          # RISC-V hardware definitions and register context
-│   ├── interrupt.c            # Interrupt initialization, handler table, and dispatch logic
-│   ├── interruptdispatcher.s  # Assembly interrupt entry point and register save/restore
 │   ├── interrupt.h            # Interrupt definitions, IRQ codes, and mask functions (save/restore)
-│   ├── kernel.c               # Kernel entry point (__kentry) and null process loop
-│   ├── kmain.c                # Initial main process logic (kmain)
 │   ├── kmain.h                # Initial main process function prototype
-│   ├── kprint.c               # Kernel printing functions and UART communication
 │   ├── kprint.h               # Header declarations for kernel printing functions
 │   ├── ktypes.h               # Kernel type definitions, limits, and status codes
-│   ├── memory.c               # Memory block allocation for process stacks and heap, and simple heap allocator (chef_malloc)
 │   ├── memory.h               # Memory block and heap allocator definitions and prototypes
-│   ├── process.c              # Process management (create, resume, kill) and process table
 │   ├── process.h              # Process table structures, states, and prototypes
 │   ├── rio.h                  # Master header aggregating all project headers and common declarations
-│   ├── schedqueue.c           # Scheduler ready queue operations (enqueue, dequeue, remove)
 │   ├── schedqueue.h           # Scheduler ready queue definitions and prototypes
-│   ├── scheduler.c            # Process scheduler implementation (yield)
 │   └── scheduler.h            # Scheduler declarations and context switch interface
+├── src/                       # Kernel assembly and C source files
+│   ├── boot.s                 # Assembly startup code
+│   ├── clock.c                # Hardware clock initialization (clock_init)
+│   ├── cswtch.s               # Assembly context switch routine
+│   ├── firstrunwrapper.s      # Assembly wrapper for newly created processes
+│   ├── interrupt.c            # Interrupt initialization, handler table, and dispatch logic
+│   ├── interruptdispatcher.s  # Assembly interrupt entry point and register save/restore
+│   ├── kernel.c               # Kernel entry point (__kentry) and null process loop
+│   ├── kmain.c                # Initial main process logic (kmain)
+│   ├── kprint.c               # Kernel printing functions and UART communication
+│   ├── memory.c               # Memory block allocation for process stacks and heap, and simple heap allocator (chef_malloc)
+│   ├── process.c              # Process management (create, resume, kill) and process table
+│   ├── schedqueue.c           # Scheduler ready queue operations (enqueue, dequeue, remove)
+│   └── scheduler.c            # Process scheduler implementation (yield)
 ├── LICENSE                    # GNU General Public License v3
 ├── linker.ld                  # Linker script mapping sections to the RAM base address
 ├── Makefile                   # Build rules and QEMU execution targets

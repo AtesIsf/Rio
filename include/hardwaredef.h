@@ -1,7 +1,7 @@
 #ifndef HARDWAREDEF_H
 #define HARDWAREDEF_H
 
-#include "ktypes.h"
+#include <ktypes.h>
 
 /**
  * There are multiple structs to be defined to ensure compatibility with

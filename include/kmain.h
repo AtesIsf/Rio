@@ -1,7 +1,7 @@
 #ifndef KMAIN_H
 #define KMAIN_H
 
-#include "process.h"
+#include <process.h>
 
 process kmain();
 

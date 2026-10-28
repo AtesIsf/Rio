@@ -1,8 +1,8 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
-#include "hardwaredef.h"
-#include "ktypes.h"
+#include <hardwaredef.h>
+#include <ktypes.h>
 
 /**
  * In RISC-V, there are 3 types of interrupts (traps):

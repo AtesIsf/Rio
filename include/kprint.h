@@ -1,7 +1,7 @@
 #ifndef KPRINT_H
 #define KPRINT_H
 
-#include "ktypes.h"
+#include <ktypes.h>
 
 #include <stdarg.h>
 
