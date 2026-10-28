@@ -45,7 +45,7 @@ irq get_irq() {
     case SCAUSE_SOFTWARE: // unused for now
         break;
     default:
-        kprintf("[Warning] Uknown scause value: %x\n", cause);
+        kprintf("[Warning] Unknown scause value: %x\n", cause);
     }
 
     return code;
