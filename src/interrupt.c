@@ -52,11 +52,19 @@ irq get_irq() {
 }
 
 /**
- * TODO: Handles a clock interrupt
+ * Handles a clock interrupt. Every 20ms, a context switch occurs.
  */
 status_code handler_clock() {
-    write_stimecmp(read_time() + QUANTUM);
-    yield();
+    static int32 tick_counter = 1;
+    tick_counter = (tick_counter + 1) % QUANTUM;
+
+    // TODO: handle per-rick operations like sleeping
+
+    if (tick_counter == 0) {
+        write_stimecmp(read_time() + TICK_MS);
+        yield();
+    }
+
     return OK;
 }
 
