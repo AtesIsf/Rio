@@ -40,6 +40,13 @@ bss_clear:
     csrw medeleg, t0
     csrw mideleg, t0
 
+    /* enable interrupts in the SIE register */
+    /* this was done in C in xv6, but I didn't wanna do that */
+    li t0, (1 << 5) # enable supervisor timer interrupts
+    csrs sie, t0
+    li t0, (1 << 9) # enable supervisor external interrupts
+    csrs sie, t0
+
     /* let s-mode access the hardware clock */
     /* this was done in C in xv6, but I didn't wanna do that */
 

@@ -55,6 +55,7 @@ irq get_irq() {
  * TODO: Handles a clock interrupt
  */
 status_code handler_clock() {
+    write_stimecmp(read_time() + QUANTUM);
     yield();
     return OK;
 }
