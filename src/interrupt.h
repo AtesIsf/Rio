@@ -14,7 +14,7 @@
 // TODO: Add more later
 /* IRQ DEFINITIONS */
 #define IRQ_UNKNOWN (0)
-#define IRQ_TIMER   (1)
+#define IRQ_CLOCK   (1)
 
 // TODO: May wanna define a better constant later. 8 is random
 /**
@@ -26,7 +26,7 @@ extern void *interrupt_handler_table[8];
 
 extern void dispatch_interrupt();
 
-status_code interrupts_init();
+void interrupts_init();
 
 status_code handle_interrupt();
 

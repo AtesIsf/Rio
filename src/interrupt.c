@@ -2,11 +2,10 @@
 
 void *interrupt_handler_table[8];
 
-status_code interrupts_init() {
+void interrupts_init() {
     interrupt_handler_table[0] = NULL;
     interrupt_handler_table[1] = handler_clock;
     write_stvec((uint64) dispatch_interrupt);
-    return OK;
 }
 
 /**
@@ -36,7 +35,7 @@ irq get_irq() {
     
     switch (cause) {
     case SCAUSE_TIMER: // clock timer
-        code = IRQ_TIMER;
+        code = IRQ_CLOCK;
         break;
 
     case SCAUSE_EXTERNAL: // external device, TODO: must get plic

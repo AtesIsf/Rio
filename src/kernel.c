@@ -13,6 +13,7 @@
 void __kentry(void) {
     process_table_init();
     sched_queue_init();
+    clock_init();
     interrupts_init();
 
     // the main process will have priority 64

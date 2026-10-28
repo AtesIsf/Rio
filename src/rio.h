@@ -4,6 +4,7 @@
 /* RIO Header Files */
 
 // IWYU pragma: begin_exports
+#include "clock.h"
 #include "hardwaredef.h"
 #include "interrupt.h"
 #include "kmain.h"
