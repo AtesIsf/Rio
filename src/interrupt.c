@@ -2,10 +2,28 @@
 
 void *interrupt_handler_table[8];
 
-status_code init_interrupt_table() {
+status_code interrupts_init() {
     interrupt_handler_table[0] = NULL;
     interrupt_handler_table[1] = handler_clock;
+    write_stvec((uint64) dispatch_interrupt);
     return OK;
+}
+
+/**
+ * Handles an interrupt that occurs
+ */
+status_code handle_interrupt() {
+    intmask mask = interrupt_save();
+
+    irq code = get_irq();
+    // dereference a function pointer that takes no arguments
+    status_code (*handler)();
+    handler = interrupt_handler_table[code];
+    // don't dereference if NULL
+    status_code return_val = handler == NULL ? ERR : handler();
+
+    interrupt_restore(mask);
+    return return_val;
 }
 
 /**
@@ -37,6 +55,7 @@ irq get_irq() {
  * TODO: Handles a clock interrupt
  */
 status_code handler_clock() {
+    yield();
     return OK;
 }
 

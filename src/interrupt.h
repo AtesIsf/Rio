@@ -24,7 +24,11 @@ extern void *interrupt_handler_table[8];
 
 /* function prototypes */
 
-status_code init_interrupt_table();
+extern void dispatch_interrupt();
+
+status_code interrupts_init();
+
+status_code handle_interrupt();
 
 irq get_irq();
 

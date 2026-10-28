@@ -13,7 +13,7 @@
 void __kentry(void) {
     process_table_init();
     sched_queue_init();
-    init_interrupt_table();
+    interrupts_init();
 
     // the main process will have priority 64
     resume(create(kmain, 64, "kmain", 0));
