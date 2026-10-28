@@ -65,8 +65,6 @@ struct Context {
 #define SCAUSE_SOFTWARE (0x8000000000000001L) // Supervisor software interrupt
 #define SCAUSE_TIMER    (0x8000000000000005L) // Supervisor timer interrupt
 #define SCAUSE_EXTERNAL (0x8000000000000009L) // Supervisor external interrupt
-#define SCAUSE_USER_SYSCALL     (8) // Syscall from user space
-#define SCAUSE_KERNEL_SYSCALL   (9) // Syscall from kernel space
 
 /* CSRR READ/WRITE FUNCTIONS */
 

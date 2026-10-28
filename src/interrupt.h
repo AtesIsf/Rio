@@ -15,7 +15,6 @@
 /* IRQ DEFINITIONS */
 #define IRQ_UNKNOWN (0)
 #define IRQ_TIMER   (1)
-#define IRQ_SYSCALL (2) // may have to define user syscall later!!!
 
 // TODO: May wanna define a better constant later. 8 is random
 /**
@@ -30,8 +29,6 @@ status_code init_interrupt_table();
 irq get_irq();
 
 status_code handler_clock();
-
-status_code handler_syscall();
 
 /* inline functions from here */
 

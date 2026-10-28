@@ -5,7 +5,6 @@ void *interrupt_handler_table[8];
 status_code init_interrupt_table() {
     interrupt_handler_table[0] = NULL;
     interrupt_handler_table[1] = handler_clock;
-    interrupt_handler_table[2] = handler_syscall;
     return OK;
 }
 
@@ -25,12 +24,6 @@ irq get_irq() {
     case SCAUSE_EXTERNAL: // external device, TODO: must get plic
         break;
 
-    case SCAUSE_KERNEL_SYSCALL:
-        code = IRQ_SYSCALL;
-        break;
-
-    case SCAUSE_USER_SYSCALL: // all syscalls are kernel space for now
-        break;
     case SCAUSE_SOFTWARE: // unused for now
         break;
     default:
@@ -47,9 +40,3 @@ status_code handler_clock() {
     return OK;
 }
 
-/**
- * TODO: Handles a syscall (from kernel-mode)
- */
-status_code handler_syscall() {
-    return OK;
-}
