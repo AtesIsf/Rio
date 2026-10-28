@@ -40,6 +40,17 @@ bss_clear:
     csrw medeleg, t0
     csrw mideleg, t0
 
+    /* let s-mode access the hardware clock */
+    /* this was done in C in xv6, but I didn't wanna do that */
+
+    # supervisor timer counter enable
+    li t0, (1 << 63) # MENVCFG_STCE in xv6
+    csrs menvcfg, t0
+
+    # allow s-mode (and u-mode) to read the timer
+    li t0, 2
+    csrs mcounteren, t0
+
     /* set mstatus.MPP to S-mode */
     csrr t0, mstatus
     li t1, ~(3 << 11)
