@@ -1,4 +1,3 @@
-#include "process.h"
 #include <rio.h>
 
 static struct LobbyEntry lobby[N_PROCS];
