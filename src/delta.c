@@ -1,4 +1,3 @@
-#include "lobby.h"
 #include <rio.h>
 
 struct LobbyEntry g_delta;
