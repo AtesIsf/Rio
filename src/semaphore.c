@@ -1,4 +1,3 @@
-#include "lobby.h"
 #include <rio.h>
 
 struct SemEntry g_semaphores[N_SEM];
