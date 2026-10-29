@@ -67,11 +67,13 @@ rio/
 │   ├── kmain.h                # Initial main process function prototype
 │   ├── kprint.h               # Header declarations for kernel printing functions
 │   ├── ktypes.h               # Kernel type definitions, limits, and status codes
+│   ├── lobby.h                # Generic process wait queue (lobby) structures and prototypes
 │   ├── memory.h               # Memory block and heap allocator definitions and prototypes
 │   ├── process.h              # Process table structures, states, and prototypes
 │   ├── rio.h                  # Master header aggregating all project headers and common declarations
 │   ├── schedqueue.h           # Scheduler ready queue definitions and prototypes
-│   └── scheduler.h            # Scheduler declarations and context switch interface
+│   ├── scheduler.h            # Scheduler declarations and context switch interface
+│   └── semaphore.h            # Semaphore structures, state definitions, and prototypes
 ├── src/                       # Kernel assembly and C source files
 │   ├── boot.s                 # Assembly startup code
 │   ├── clock.c                # Hardware clock initialization (clock_init)
@@ -82,10 +84,12 @@ rio/
 │   ├── kernel.c               # Kernel entry point (__kentry) and null process loop
 │   ├── kmain.c                # Initial main process logic (kmain)
 │   ├── kprint.c               # Kernel printing functions and UART communication
+│   ├── lobby.c                # Generic process wait queue (lobby) operations (enqueue, dequeue, remove)
 │   ├── memory.c               # Memory block allocation for process stacks and heap, and simple heap allocator (chef_malloc)
 │   ├── process.c              # Process management (create, resume, kill) and process table
 │   ├── schedqueue.c           # Scheduler ready queue operations (enqueue, dequeue, remove)
-│   └── scheduler.c            # Process scheduler implementation (yield)
+│   ├── scheduler.c            # Process scheduler implementation (yield)
+│   └── semaphore.c            # Counting semaphore implementation (sem_create, sem_wait, sem_release, sem_free)
 ├── compile_flags.txt          # Compiler flags for clangd and language servers
 ├── LICENSE                    # GNU General Public License v3
 ├── linker.ld                  # Linker script mapping sections to the RAM base address
@@ -110,6 +114,7 @@ flowchart TD
         PROC["Process Manager"]
         INT["Interrupt Manager"]
         SCHED["CPU Scheduler"]
+        SEM["Semaphore Manager"]
         CONSOLE["Console Driver"]
     end
 
@@ -125,10 +130,17 @@ flowchart TD
     %% Concurrency & Critical Sections
     SCHED -.->|"Disables/restores interrupts"| INT
     PROC -.->|"Disables/restores interrupts"| INT
+    SEM -.->|"Disables/restores interrupts"| INT
 
     %% Process & Memory Interactions
     PROC -->|"Allocates / frees stacks"| MEM
     PROC -->|"Enqueues ready processes"| SCHED
+
+    %% Synchronization (Semaphores)
+    TASKS -->|"Wait / release"| SEM
+    SEM -->|"Resumes waiting processes"| PROC
+    SEM -->|"Yields CPU on wait"| SCHED
+    PROC -->|"Cleans up waiting processes"| SEM
 
     %% Task Execution & I/O
     TASKS -->|"System calls"| PROC
