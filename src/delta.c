@@ -25,11 +25,13 @@ status_code delta_tick() {
     decrement_delta(&g_delta, proc); 
     delta--;
     defer_yield = true;
+    bool resumed_procs = false;
     while (delta == 0) {
         lobby_dequeue(&g_delta, &proc);
         // handle sleeping proc
         if (g_process_table[proc].state == PROC_SLEEP) {
             resume(proc);
+            resumed_procs = true;
         }
 
         status_code result = lobby_peek(&g_delta, &proc, &delta);
@@ -38,6 +40,10 @@ status_code delta_tick() {
         }
     }
     defer_yield = false;
+
+    if (resumed_procs) {
+        yield();
+    }
 
     return OK;
 }

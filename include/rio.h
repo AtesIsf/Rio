@@ -17,6 +17,7 @@
 #include <schedqueue.h>
 #include <scheduler.h>
 #include <semaphore.h>
+#include <sleep.h>
 // IWYU pragma: end_exports
 
 /* Other Prototypes */
