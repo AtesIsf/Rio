@@ -62,6 +62,7 @@ rio/
 ├── bin/                       # Output directory for compiled object files (.o)
 ├── include/                   # Kernel header files
 │   ├── clock.h                # Hardware clock definitions and quantum constant
+│   ├── delta.h                # Delta list definitions and tick handler prototype
 │   ├── hardwaredef.h          # RISC-V hardware definitions and register context
 │   ├── interrupt.h            # Interrupt definitions, IRQ codes, and mask functions (save/restore)
 │   ├── kmain.h                # Initial main process function prototype
@@ -73,11 +74,13 @@ rio/
 │   ├── rio.h                  # Master header aggregating all project headers and common declarations
 │   ├── schedqueue.h           # Scheduler ready queue definitions and prototypes
 │   ├── scheduler.h            # Scheduler declarations and context switch interface
-│   └── semaphore.h            # Semaphore structures, state definitions, and prototypes
+│   ├── semaphore.h            # Semaphore structures, state definitions, and prototypes
+│   └── sleep.h                # Sleep and unsleep system call prototypes
 ├── src/                       # Kernel assembly and C source files
 │   ├── boot.s                 # Assembly startup code
 │   ├── clock.c                # Hardware clock initialization (clock_init)
 │   ├── cswtch.s               # Assembly context switch routine
+│   ├── delta.c                # Delta list initialization and per-tick countdown handler (delta_tick)
 │   ├── firstrunwrapper.s      # Assembly wrapper for newly created processes
 │   ├── interrupt.c            # Interrupt initialization, handler table, and dispatch logic
 │   ├── interruptdispatcher.s  # Assembly interrupt entry point and register save/restore
@@ -89,7 +92,8 @@ rio/
 │   ├── process.c              # Process management (create, resume, kill) and process table
 │   ├── schedqueue.c           # Scheduler ready queue operations (enqueue, dequeue, remove)
 │   ├── scheduler.c            # Process scheduler implementation (yield)
-│   └── semaphore.c            # Counting semaphore implementation (sem_create, sem_wait, sem_release, sem_free)
+│   ├── semaphore.c            # Counting semaphore implementation (sem_create, sem_wait, sem_release, sem_free)
+│   └── sleep.c                # Process sleep management (sleep, unsleep)
 ├── compile_flags.txt          # Compiler flags for clangd and language servers
 ├── LICENSE                    # GNU General Public License v3
 ├── linker.ld                  # Linker script mapping sections to the RAM base address
@@ -115,6 +119,7 @@ flowchart TD
         INT["Interrupt Manager"]
         SCHED["CPU Scheduler"]
         SEM["Semaphore Manager"]
+        TIMED["Timed Event Manager"]
         CONSOLE["Console Driver"]
     end
 
@@ -131,6 +136,7 @@ flowchart TD
     SCHED -.->|"Disables/restores interrupts"| INT
     PROC -.->|"Disables/restores interrupts"| INT
     SEM -.->|"Disables/restores interrupts"| INT
+    TIMED -.->|"Disables/restores interrupts"| INT
 
     %% Process & Memory Interactions
     PROC -->|"Allocates / frees stacks"| MEM
@@ -141,6 +147,12 @@ flowchart TD
     SEM -->|"Resumes waiting processes"| PROC
     SEM -->|"Yields CPU on wait"| SCHED
     PROC -->|"Cleans up waiting processes"| SEM
+
+    %% Timed Events & Sleep
+    TASKS -->|"Sleep / unsleep"| TIMED
+    INT -->|"Clock tick (delta_tick)"| TIMED
+    TIMED -->|"Wakes sleeping processes"| PROC
+    TIMED -->|"Yields CPU on sleep"| SCHED
 
     %% Task Execution & I/O
     TASKS -->|"System calls"| PROC
