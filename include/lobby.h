@@ -29,4 +29,6 @@ status_code lobby_peek(struct LobbyEntry *head, pid *id, int32 *delta);
 
 status_code lobby_remove(struct LobbyEntry *head, pid id);
 
+status_code decrement_delta(struct LobbyEntry *head, pid id);
+
 #endif

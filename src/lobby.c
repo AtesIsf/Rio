@@ -139,3 +139,30 @@ status_code lobby_remove(struct LobbyEntry *head, pid id) {
     return OK;
 }
 
+/**
+ * Decrements the delta of the given id in the queue. Helper for the
+ * delta list. Returns ERR if the head is NULL, the given id is invalid, or
+ * the given id isn't in the list. Returns OK otherwise. Does not handle
+ * any functionality to do with delta values!
+ */
+
+status_code decrement_delta(struct LobbyEntry *head, pid id) {
+    if (head == NULL || !validpid(id)) {
+        return ERR;
+    }
+
+    pid curr = head->next;
+    while (curr != LOBBY_NULL && curr != id) {
+        curr = lobby[curr].next;
+    }
+
+    if (curr == LOBBY_NULL) {
+        return ERR;
+    }
+
+    // else it is found
+    lobby[curr].delta--;
+
+    return OK;
+}
+
