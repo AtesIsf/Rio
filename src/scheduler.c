@@ -29,7 +29,7 @@ syscall yield() {
         return ERR;
     }
 
-    if (g_process_table[curr_pid].state != PROC_EMPTY) {
+    if (g_process_table[curr_pid].state == PROC_CURR) {
         sched_queue_enqueue(curr_pid, g_process_table[curr_pid].priority);
         g_process_table[curr_pid].state = PROC_READY;
     }

@@ -52,13 +52,11 @@ syscall sem_release(sem id) {
         return ERR;
     }
 
-    if ((s->count)++ > 0) {
+    if ((s->count)++ < 0) {
         pid proc = 0;
-        status_code result = lobby_dequeue(&s->head, &id);
+        status_code result = lobby_dequeue(&s->head, &proc);
         if (result != ERR) {
             resume(proc);
-        } else {
-            (s->count)--;
         }
     }
 
@@ -106,13 +104,10 @@ syscall sem_free(sem id) {
 
     // otherwise, each resume calls yield and messes up the system
     defer_yield = true;
-    while (g_semaphores[id].count++ < 0) {
-        pid proc = 0;
-        status_code result = lobby_dequeue(&g_semaphores[id].head, &proc);
-        if (result == OK) {
-            g_process_table[proc].sem_id = -1;
-            resume(proc);
-        }
+    pid proc = 0;
+    while (lobby_dequeue(&g_semaphores[id].head, &proc) == OK) {
+        g_process_table[proc].sem_id = -1;
+        resume(proc);
     }
     defer_yield = false;
 

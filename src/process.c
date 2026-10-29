@@ -167,13 +167,15 @@ syscall kill(pid id) {
             g_process_table[id].state = PROC_EMPTY;
             break;
 
-        case PROC_SLEEP:
         case PROC_WAIT:
             sem sem_id = g_process_table[id].sem_id;
             lobby_remove(&g_semaphores[sem_id].head, id);
+            g_semaphores[sem_id].count++;
             g_process_table[id].sem_id = -1;
+            g_process_table[id].state = PROC_EMPTY;
             break;
 
+        case PROC_SLEEP:
         case PROC_EMPTY:
         case PROC_SUSP:
         default:
