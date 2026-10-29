@@ -1,3 +1,4 @@
+#include "lobby.h"
 #include <rio.h>
 
 /**
@@ -169,7 +170,11 @@ syscall kill(pid id) {
 
         case PROC_SLEEP:
         case PROC_WAIT:
-            // TODO: semaphore handling later
+            sem sem_id = g_process_table[id].sem_id;
+            lobby_remove(&g_semaphores[sem_id].head, id);
+            g_process_table[id].sem_id = -1;
+            break;
+
         case PROC_EMPTY:
         case PROC_SUSP:
         default:
