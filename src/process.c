@@ -176,6 +176,10 @@ syscall kill(pid id) {
             break;
 
         case PROC_SLEEP:
+            lobby_remove(&g_delta, id);
+            g_process_table[id].state = PROC_EMPTY;
+            break;
+
         case PROC_EMPTY:
         case PROC_SUSP:
         default:
