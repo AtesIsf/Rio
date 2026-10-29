@@ -5,6 +5,7 @@
 
 // IWYU pragma: begin_exports
 #include <clock.h>
+#include <delta.h>
 #include <hardwaredef.h>
 #include <interrupt.h>
 #include <kmain.h>

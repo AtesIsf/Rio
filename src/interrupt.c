@@ -56,12 +56,10 @@ irq get_irq() {
  */
 status_code handler_clock() {
     static int32 tick_counter = 0;
-
     write_stimecmp(read_time() + TICK_MS);
 
-    tick_counter = (tick_counter + 1) % (QUANTUM / TICK_MS);
-
-    // TODO: handle per-tick operations like sleeping
+    tick_counter = (tick_counter + 1) % QUANTUM;
+    delta_tick();
 
     if (tick_counter == 0) {
         yield();
