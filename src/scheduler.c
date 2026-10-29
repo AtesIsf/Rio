@@ -1,6 +1,7 @@
 #include <rio.h>
 
-pid curr_pid;
+pid curr_pid = 0;
+bool defer_yield = false;
 
 /**
  * Switches context to the next process in the schedqueue
@@ -14,6 +15,11 @@ pid curr_pid;
 
 syscall yield() {
     intmask mask = interrupt_save();
+
+    if (defer_yield) {
+        interrupt_restore(mask);
+        return ERR;
+    }
 
     // This could only happen if the queue isn't initialized or if the
     // NULL process has been removed for whatever reason (which should

@@ -34,7 +34,7 @@ syscall sem_wait(sem id);
 
 syscall sem_release(sem id);
 
-syscall sem_create(int32 count);
+syscall sem_create(int32 count, sem *id);
 
 syscall sem_free(sem id);
 

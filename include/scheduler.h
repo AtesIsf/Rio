@@ -6,6 +6,7 @@
 #include <process.h>
 
 extern pid curr_pid;
+extern bool defer_yield;
 
 // implemented in cswtch.s
 extern void cswtch(struct Context *prev, struct Context *next);

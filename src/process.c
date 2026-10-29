@@ -107,6 +107,7 @@ syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
     g_process_table[id].name = name;
     g_process_table[id].priority = priority;
     g_process_table[id].state = PROC_SUSP;
+    g_process_table[id].sem_id = -1;
 
     interrupt_restore(mask);
     return id;

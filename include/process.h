@@ -32,6 +32,7 @@ struct ProcessTableEntry {
     byte *stack_base;
     const char *name;
     int32 priority;
+    sem sem_id;
     byte state;
 };
 
