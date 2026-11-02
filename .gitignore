@@ -54,3 +54,16 @@ compile_commands.json
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# AI agents and assistant tooling
+.agents/
+.agent/
+.sid.json
+.gemini/
+.claude/
+.cursor/
+.cursorrules
+.copilot/
+.aider*
+.windsurf/
+
