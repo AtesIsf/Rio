@@ -10,6 +10,22 @@ professor for CS354: Operating Systems at Purdue University.
 * "xv6: a simple, Unix-like teaching operating system" by Russ Cox, Frans
 Kaashoek, and Rober Morris.
 
+## Table of Contents
+
+- [Installation (Arch Linux)](#installation-arch-linux)
+- [Makefile Guide](#makefile-guide)
+- [Project Structure](#project-structure)
+- [Modules](#modules)
+  - [Memory Manager](#memory-manager)
+  - [Process Manager](#process-manager)
+  - [Interrupt Manager](#interrupt-manager)
+  - [CPU Scheduler](#cpu-scheduler)
+  - [Semaphore Manager](#semaphore-manager)
+  - [Timed Event Manager](#timed-event-manager)
+  - [Console Driver](#console-driver)
+  - [Hardware & Execution Layers](#hardware--execution-layers)
+- [System Architecture](#system-architecture)
+
 ## Installation (Arch Linux)
 
 To compile and run RIO on Arch Linux, install the RISC-V bare-metal toolchain, 
