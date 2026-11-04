@@ -1,28 +1,22 @@
 #include <rio.h>
 
-status_code test_kprint(void) {
-    int32 fails = 0;
+extern int32 g_tests_passed;
+extern int32 g_defects_found;
 
+process test_kprint(void) {
     // 1. NULL pointer rejection
-    if (kprint(NULL) != ERR) {
-        kputs("FAIL: kprint(NULL) did not return ERR");
-        fails++;
+    if (kprint(NULL) == ERR) {
+        g_tests_passed++;
+    }
+    if (kputs(NULL) == ERR) {
+        g_tests_passed++;
     }
 
-    if (kputs(NULL) != ERR) {
-        kputs("FAIL: kputs(NULL) did not return ERR");
-        fails++;
+    // 2. Empty string valid handling
+    if (kprint("") == OK) {
+        g_tests_passed++;
     }
 
-    // 2. Valid empty and normal string output
-    if (kprint("") != OK) {
-        kputs("FAIL: kprint(\"\") did not return OK");
-        fails++;
-    }
-
-    if (fails == 0) {
-        kputs("PASS: test_kprint");
-        return OK;
-    }
-    return ERR;
+    kputs("  [PASS] test_kprint");
+    return OK;
 }

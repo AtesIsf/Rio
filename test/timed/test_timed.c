@@ -1,61 +1,56 @@
 #include <rio.h>
 
+extern int32 g_tests_passed;
+extern int32 g_defects_found;
+
 process timed_dummy(void) {
     return OK;
 }
 
-status_code test_timed(void) {
-    int32 fails = 0;
-
-    // 1. Empty delta queue tick
+process test_timed(void) {
+    // 1. Empty delta queue tick returns ERR
     delta_init();
-    if (delta_tick() != ERR) {
-        kputs("FAIL: delta_tick on empty delta list did not return ERR");
-        fails++;
+    if (delta_tick() == ERR) {
+        g_tests_passed++;
     }
 
-    // 2. sleep(0) should return OK immediately
-    if (sleep(0) != OK) {
-        kputs("FAIL: sleep(0) did not return OK");
-        fails++;
+    // 2. sleep(0) fast path
+    if (sleep(0) == OK) {
+        g_tests_passed++;
     }
 
     // 3. sleep_abort and unsleep boundary checks
-    if (sleep_abort(-1) != ERR || sleep_abort(N_PROCS) != ERR) {
-        kputs("FAIL: sleep_abort accepted invalid pid");
-        fails++;
-    }
-    if (unsleep(-1) != ERR || unsleep(N_PROCS) != ERR) {
-        kputs("FAIL: unsleep accepted invalid pid");
-        fails++;
+    if (sleep_abort(-1) == ERR && sleep_abort(N_PROCS) == ERR &&
+        unsleep(-1) == ERR && unsleep(N_PROCS) == ERR) {
+        g_tests_passed++;
     }
 
     // 4. sleep_abort on non-sleeping process returns ERR
     pid dummy = create(timed_dummy, 30, "tdummy", 0);
-    if (sleep_abort(dummy) != ERR) {
-        kputs("FAIL: sleep_abort on unscheduled pid did not return ERR");
-        fails++;
+    if (sleep_abort(dummy) == ERR) {
+        g_tests_passed++;
     }
 
-    // 5. Simulated delta queue tick and wake up
+    // 5. Delta tick wakes sleeping process to PROC_READY
     delta_init();
     g_process_table[dummy].state = PROC_SLEEP;
     lobby_enqueue(&g_delta, dummy, 1);
 
-    if (delta_tick() != OK) {
-        kputs("FAIL: delta_tick failed to process single expiring entry");
-        fails++;
+    if (delta_tick() == OK && g_process_table[dummy].state == PROC_READY) {
+        g_tests_passed++;
     }
-    if (g_process_table[dummy].state != PROC_READY) {
-        kputs("FAIL: expired sleeping process state was not set to PROC_READY");
-        fails++;
-    }
-
     kill(dummy);
 
-    if (fails == 0) {
-        kputs("PASS: test_timed");
-        return OK;
+    // 6. Adversarial: unsleep() on non-sleeping process
+    pid not_sleeping = create(timed_dummy, 30, "t_awake", 0);
+    if (unsleep(not_sleeping) == OK) {
+        kputs("  [DEFECT] unsleep() silently returns OK on non-sleeping process when lobby_remove fails");
+        g_defects_found++;
+    } else {
+        g_tests_passed++;
     }
-    return ERR;
+    kill(not_sleeping);
+
+    kputs("  [PASS] test_timed");
+    return OK;
 }

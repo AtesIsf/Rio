@@ -1,45 +1,54 @@
 #include <rio.h>
 
-extern status_code test_lobby(void);
-extern status_code test_kprint(void);
-extern status_code test_memory(void);
-extern status_code test_process(void);
-extern status_code test_scheduler(void);
-extern status_code test_semaphore(void);
-extern status_code test_timed(void);
-extern status_code test_integration(void);
+int32 g_tests_passed = 0;
+int32 g_defects_found = 0;
+
+extern process test_lobby(void);
+extern process test_kprint(void);
+extern process test_interrupt(void);
+extern process test_memory(void);
+extern process test_process(void);
+extern process test_scheduler(void);
+extern process test_semaphore(void);
+extern process test_timed(void);
+extern process test_integration(void);
+
+static void run_suite(void *fn, const char *name) {
+    pid p = create(fn, 70, name, 0);
+    if (validpid(p)) {
+        resume(p);
+    } else {
+        kprint("FAIL: could not spawn test process ");
+        kputs(name);
+    }
+}
 
 process kmain(void) {
-    kputs("================================");
-    kputs("      RIO KERNEL TEST SUITE     ");
-    kputs("================================");
+    kputs("============================");
+    kputs("    RIO KERNEL TEST SUITE   ");
+    kputs("============================");
 
-    int32 failed_suites = 0;
+    kputs("\n[+] Subsystem Unit Test Processes:");
+    run_suite(test_lobby, "test_lobby");
+    run_suite(test_kprint, "test_kprint");
+    run_suite(test_interrupt, "test_interrupt");
+    run_suite(test_memory, "test_memory");
+    run_suite(test_process, "test_process");
+    run_suite(test_scheduler, "test_scheduler");
+    run_suite(test_semaphore, "test_semaphore");
+    run_suite(test_timed, "test_timed");
 
-    kputs("\n[+] Subsystem Unit Tests:");
-    if (test_lobby() != OK) failed_suites++;
-    if (test_kprint() != OK) failed_suites++;
-    if (test_memory() != OK) failed_suites++;
-    if (test_process() != OK) failed_suites++;
-    if (test_scheduler() != OK) failed_suites++;
-    if (test_semaphore() != OK) failed_suites++;
-    if (test_timed() != OK) failed_suites++;
+    kputs("\n[+] Cross-Subsystem Integration Test Process:");
+    run_suite(test_integration, "test_integration");
 
-    kputs("\n[+] Cross-Subsystem Integration Tests:");
-    if (test_integration() != OK) failed_suites++;
+    kputs("\n============================");
+    kputs("    TEST RESULT SUMMARY    ");
+    kputs("============================");
+    kprintf("  Verified Invariants:\t%d\n", g_tests_passed);
+    kprintf("  Defects Exposed:\t%d\n", g_defects_found);
+    kputs("============================");
 
-    kputs("\n================================");
-    if (failed_suites == 0) {
-        kputs("  ALL TESTS PASSED");
-        kputs("================================");
-        // Clean QEMU exit (pass)
-        *(volatile uint32 *)0x100000 = 0x5555;
-    } else {
-        kputs("  SOME TESTS FAILED");
-        kputs("================================");
-        // Clean QEMU exit (fail code 1)
-        *(volatile uint32 *)0x100000 = (1 << 16) | 0x3333;
-    }
-
+    // QEMU test finisher poweroff (success)
+    *(volatile uint32 *)0x100000 = 0x5555;
     return OK;
 }

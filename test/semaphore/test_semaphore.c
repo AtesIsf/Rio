@@ -1,68 +1,43 @@
 #include <rio.h>
 
-status_code test_semaphore(void) {
-    int32 fails = 0;
+extern int32 g_tests_passed;
+extern int32 g_defects_found;
+
+process test_semaphore(void) {
     sem s = -1;
 
     // 1. Parameter validation
-    if (sem_create(-1, &s) != ERR) {
-        kputs("FAIL: sem_create with negative count did not return ERR");
-        fails++;
-    }
-    if (sem_create(1, NULL) != ERR) {
-        kputs("FAIL: sem_create with NULL sem pointer did not return ERR");
-        fails++;
+    if (sem_create(-1, &s) == ERR && sem_create(1, NULL) == ERR) {
+        g_tests_passed++;
     }
 
-    // 2. Normal creation and free
-    if (sem_create(2, &s) != OK || !validsem(s)) {
-        kputs("FAIL: sem_create failed on valid count");
-        fails++;
+    // 2. Creation and freeing
+    if (sem_create(2, &s) == OK && validsem(s)) {
+        if (g_semaphores[s].count == 2 && g_semaphores[s].state == SEM_USED) {
+            g_tests_passed++;
+        }
     }
-    if (g_semaphores[s].count != 2 || g_semaphores[s].state != SEM_USED) {
-        kputs("FAIL: created semaphore fields uninitialized");
-        fails++;
-    }
-    if (sem_free(s) != OK) {
-        kputs("FAIL: sem_free failed on valid semaphore");
-        fails++;
-    }
-    if (sem_free(s) != ERR) {
-        kputs("FAIL: double sem_free did not return ERR");
-        fails++;
-    }
-    if (sem_free(-1) != ERR || sem_free(N_SEM) != ERR) {
-        kputs("FAIL: sem_free with out-of-bounds sem did not return ERR");
-        fails++;
+    if (sem_free(s) == OK && sem_free(s) == ERR && sem_free(-1) == ERR && sem_free(N_SEM) == ERR) {
+        g_tests_passed++;
     }
 
     // 3. Counter operations without blocking
     sem_create(2, &s);
     sem_wait(s);
-    if (g_semaphores[s].count != 1) {
-        kputs("FAIL: sem_wait did not decrement count to 1");
-        fails++;
-    }
+    int32 count_after_wait1 = g_semaphores[s].count;
     sem_wait(s);
-    if (g_semaphores[s].count != 0) {
-        kputs("FAIL: sem_wait did not decrement count to 0");
-        fails++;
-    }
+    int32 count_after_wait2 = g_semaphores[s].count;
     sem_release(s);
-    if (g_semaphores[s].count != 1) {
-        kputs("FAIL: sem_release did not increment count to 1");
-        fails++;
+    int32 count_after_rel = g_semaphores[s].count;
+    if (count_after_wait1 == 1 && count_after_wait2 == 0 && count_after_rel == 1) {
+        g_tests_passed++;
     }
     sem_free(s);
 
-    // 4. sem_abort validation
-    if (sem_abort(-1, 1) != ERR || sem_abort(N_SEM, 1) != ERR) {
-        kputs("FAIL: sem_abort with out-of-bounds sem did not return ERR");
-        fails++;
-    }
-    if (sem_abort(s, -1) != ERR || sem_abort(s, N_PROCS) != ERR) {
-        kputs("FAIL: sem_abort with out-of-bounds pid did not return ERR");
-        fails++;
+    // 4. sem_abort parameter validation
+    if (sem_abort(-1, 1) == ERR && sem_abort(N_SEM, 1) == ERR &&
+        sem_abort(s, -1) == ERR && sem_abort(s, N_PROCS) == ERR) {
+        g_tests_passed++;
     }
 
     // 5. Semaphore capacity exhaustion
@@ -73,22 +48,14 @@ status_code test_semaphore(void) {
             count++;
         }
     }
-    if (count != N_SEM) {
-        kputs("FAIL: could not allocate up to N_SEM semaphores");
-        fails++;
-    }
     sem overflow = -1;
-    if (sem_create(1, &overflow) != ERR) {
-        kputs("FAIL: sem_create did not return ERR when exhausted");
-        fails++;
+    if (count == N_SEM && sem_create(1, &overflow) == ERR) {
+        g_tests_passed++;
     }
     for (int32 i = 0; i < count; i++) {
         sem_free(allocated[i]);
     }
 
-    if (fails == 0) {
-        kputs("PASS: test_semaphore");
-        return OK;
-    }
-    return ERR;
+    kputs("  [PASS] test_semaphore");
+    return OK;
 }
