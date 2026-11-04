@@ -24,8 +24,6 @@ Kaashoek, and Rober Morris.
   - [Semaphore Manager](#semaphore-manager)
   - [Timed Event Manager](#timed-event-manager)
   - [Console Driver](#console-driver)
-  - [Shared Kernel Data Structures](#shared-kernel-data-structures)
-  - [Hardware & Execution Layers](#hardware--execution-layers)
 - [System Architecture](#system-architecture)
 
 ## Installation
@@ -155,6 +153,7 @@ This section describes each subsystem shown in the architecture flowchart below,
 | :--- | :--- |
 | `syscall sleep(uint64 ms)` | Suspends the calling process for `ms` milliseconds by inserting it into the delta list and calling `yield()`. |
 | `syscall unsleep(pid id)` | Cancels a sleeping process's timer early, removing it from the delta list and calling `resume()`. |
+| `syscall sleep_abort(pid id)` | Removes a sleeping process from the delta list without resuming it (used by `kill`). |
 
 ### Console Driver
 **Files:** `include/kprint.h`, `src/console/kprint.c`
@@ -166,26 +165,6 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `status_code kputs(const char *str)` | Transmits a null-terminated string followed by a newline (`\n`) to UART. |
 | `void kprintf(const char *format, ...)` | Kernel formatted printing function supporting `%d`, `%i`, `%u`, `%x`, `%p`, `%c`, and `%s`. |
 | `void kvprintf(const char *format, va_list arg)` | Core variadic formatted string emitter writing directly to UART. |
-
-### Shared Kernel Data Structures
-**Files:** `include/lobby.h`, `src/common/lobby.c`
-
-| Endpoint | Description |
-| :--- | :--- |
-| `void lobby_init(void)` | Initializes the wait-queue lobby table entries to empty. |
-| `status_code lobby_dequeue(struct LobbyEntry *head, pid *id)` | Removes and returns the process at the head of the wait queue. |
-| `status_code lobby_enqueue(struct LobbyEntry *head, pid id, int32 delta)` | Inserts a process into the wait queue sorted by key/delta value. |
-| `status_code lobby_peek(struct LobbyEntry *head, pid *id, int32 *delta)` | Inspects the head process and delta without removing it. |
-| `status_code lobby_remove(struct LobbyEntry *head, pid id)` | Removes a specific process from the wait queue by PID, adjusting successor deltas. |
-
-### Hardware & Execution Layers
-**Files:** `include/clock.h`, `src/timed/clock.c`, `include/hardwaredef.h`, `include/kmain.h`, `src/core/kmain.c`, `src/core/kernel.c`, `src/core/boot.s`
-
-| Subsystem / Component | Files | Endpoints / Operations | Description |
-| :--- | :--- | :--- | :--- |
-| **RISC-V Timer (`stimecmp`)** | `include/clock.h`, `src/timed/clock.c`, `include/hardwaredef.h` | `read_time()`, `write_stimecmp()` | Hardware timer CSR read/write accessors. |
-| **16550 UART Serial** | `include/kprint.h`, `src/console/kprint.c` | Memory-mapped I/O (`UART_ADDR`) | Physical 16550 UART hardware chip mapped at address `0x10000000`. |
-| **Active Processes & Core** | `include/kmain.h`, `src/core/kmain.c`, `src/core/kernel.c`, `src/core/boot.s` | `__kentry()`, `kmain()` | Entry point for system bootstrap (`boot.s`), kernel init (`__kentry`), and first process (`kmain`). |
 
 ## System Architecture
 
@@ -207,7 +186,6 @@ flowchart TD
         SEM["Semaphore Manager"]
         TIMED["Timed Event Manager"]
         CONSOLE["Console Driver"]
-        DS["Shared Data Structures (Lobby)"]
     end
 
     subgraph Exec ["Execution"]
@@ -215,7 +193,7 @@ flowchart TD
     end
 
     %% Preemption & Scheduling
-    HW_TIMER -->|"Timer interrupt"| INT
+    HW_TIMER -.->|"Timer interrupt"| INT
     INT -->|"yield"| SCHED
     SCHED -.->|"Context switch"| TASKS
 
@@ -240,11 +218,7 @@ flowchart TD
     INT -.->|"Clock interrupt (delta_tick)"| TIMED
     TIMED -->|"resume"| PROC
     TIMED -->|"yield"| SCHED
-
-    %% Shared Kernel Data Structures
-    SEM -->|"lobby_enqueue, lobby_dequeue"| DS
-    TIMED -->|"lobby_enqueue, lobby_dequeue"| DS
-    PROC -.->|"lobby_remove"| DS
+    PROC -->|"sleep_abort"| TIMED
 
     %% Task Execution & I/O
     TASKS -->|"create, resume, kill"| PROC
