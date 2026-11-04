@@ -195,7 +195,7 @@ flowchart TD
     %% Preemption & Scheduling
     HW_TIMER -.->|"Timer interrupt"| INT
     INT -->|"yield"| SCHED
-    SCHED -->|"Context switch"| TASKS
+    SCHED -.->|"Context switch"| TASKS
 
     %% Concurrency & Critical Sections
     SCHED -->|"interrupt_save, interrupt_restore"| INT
