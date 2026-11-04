@@ -22,6 +22,18 @@ syscall sleep(uint64 ms) {
     return OK;
 }
 
+syscall sleep_abort(pid id) {
+    intmask mask = interrupt_save();
+    if (!validpid(id)) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
+    status_code result = lobby_remove(&g_delta, id);
+    interrupt_restore(mask);
+    return result;
+}
+
 syscall unsleep(pid id) {
     intmask mask = interrupt_save();
     if (!validpid(id)) {

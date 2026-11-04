@@ -174,7 +174,7 @@ syscall kill(pid id) {
             break;
 
         case PROC_SLEEP:
-            lobby_remove(&g_delta, id);
+            sleep_abort(id);
             g_process_table[id].state = PROC_EMPTY;
             break;
 
