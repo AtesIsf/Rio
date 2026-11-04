@@ -16,7 +16,6 @@ Kaashoek, and Rober Morris.
   - [Option 1: Docker / Podman (Recommended, OS-Agnostic)](#option-1-docker--podman-recommended-os-agnostic)
   - [Option 2: Native Installation (Arch Linux)](#option-2-native-installation-arch-linux)
 - [Makefile Guide](#makefile-guide)
-- [Project Structure](#project-structure)
 - [Modules](#modules)
   - [Memory Manager](#memory-manager)
   - [Process Manager](#process-manager)
@@ -25,6 +24,7 @@ Kaashoek, and Rober Morris.
   - [Semaphore Manager](#semaphore-manager)
   - [Timed Event Manager](#timed-event-manager)
   - [Console Driver](#console-driver)
+  - [Shared Kernel Data Structures](#shared-kernel-data-structures)
   - [Hardware & Execution Layers](#hardware--execution-layers)
 - [System Architecture](#system-architecture)
 
@@ -81,7 +81,7 @@ The provided Makefile supports both native development and containerized develop
   To exit QEMU, press `Ctrl+A` followed by `X`.
 
 - **Clean build artifacts**:
-  Deletes all generated binary files (`bin/*.o`, `bin/*.d`, `rio.elf`).
+  Deletes all generated binary files (`bin/`, `rio.elf`).
   ```bash
   # Native:
   make clean
@@ -96,60 +96,12 @@ The provided Makefile supports both native development and containerized develop
   make podman-image   # or: make docker-image
   ```
 
-## Project Structure
-
-```text
-rio/
-├── bin/                       # Output directory for compiled object files (.o)
-├── include/                   # Kernel header files
-│   ├── clock.h                # Hardware clock definitions and quantum constant
-│   ├── delta.h                # Delta list definitions and tick handler prototype
-│   ├── hardwaredef.h          # RISC-V hardware definitions and register context
-│   ├── interrupt.h            # Interrupt definitions, IRQ codes, and mask functions (save/restore)
-│   ├── kmain.h                # Initial main process function prototype
-│   ├── kprint.h               # Header declarations for kernel printing functions
-│   ├── ktypes.h               # Kernel type definitions, limits, and status codes
-│   ├── lobby.h                # Generic process wait queue (lobby) structures and prototypes
-│   ├── memory.h               # Memory block and heap allocator definitions and prototypes
-│   ├── process.h              # Process table structures, states, and prototypes
-│   ├── rio.h                  # Master header aggregating all project headers and common declarations
-│   ├── schedqueue.h           # Scheduler ready queue definitions and prototypes
-│   ├── scheduler.h            # Scheduler declarations and context switch interface
-│   ├── semaphore.h            # Semaphore structures, state definitions, and prototypes
-│   └── sleep.h                # Sleep and unsleep system call prototypes
-├── src/                       # Kernel assembly and C source files
-│   ├── boot.s                 # Assembly startup code
-│   ├── clock.c                # Hardware clock initialization (clock_init)
-│   ├── cswtch.s               # Assembly context switch routine
-│   ├── delta.c                # Delta list initialization and per-tick countdown handler (delta_tick)
-│   ├── firstrunwrapper.s      # Assembly wrapper for newly created processes
-│   ├── interrupt.c            # Interrupt initialization, handler table, and dispatch logic
-│   ├── interruptdispatcher.s  # Assembly interrupt entry point and register save/restore
-│   ├── kernel.c               # Kernel entry point (__kentry) and null process loop
-│   ├── kmain.c                # Initial main process logic (kmain)
-│   ├── kprint.c               # Kernel printing functions and UART communication
-│   ├── lobby.c                # Generic process wait queue (lobby) operations (enqueue, dequeue, remove)
-│   ├── memory.c               # Memory block allocation for process stacks and heap, and simple heap allocator (chef_malloc)
-│   ├── process.c              # Process management (create, resume, kill) and process table
-│   ├── schedqueue.c           # Scheduler ready queue operations (enqueue, dequeue, remove)
-│   ├── scheduler.c            # Process scheduler implementation (yield)
-│   ├── semaphore.c            # Counting semaphore implementation (sem_create, sem_wait, sem_release, sem_free)
-│   └── sleep.c                # Process sleep management (sleep, unsleep)
-├── .dockerignore              # Ignore rules for container builds
-├── compile_flags.txt          # Compiler flags for clangd and language servers
-├── Dockerfile                 # Minimal Debian-based container definition
-├── LICENSE                    # GNU General Public License v3
-├── linker.ld                  # Linker script mapping sections to the RAM base address
-├── Makefile                   # Build rules and QEMU execution targets
-└── README.md                  # Project documentation and setup instructions
-```
-
 ## Modules
 
 This section describes each subsystem shown in the architecture flowchart below, including all contributing files and the public API endpoints (functions) exposed by each subsystem.
 
 ### Memory Manager
-**Files:** `include/memory.h`, `src/memory.c`
+**Files:** `include/memory.h`, `src/memory/memory.c`
 
 | Endpoint | Description |
 | :--- | :--- |
@@ -160,7 +112,7 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `void *chef_malloc(byte *data, int32 size)` | Bump allocator allocating an 8-byte aligned chunk of `size` bytes within the given heap block. |
 
 ### Process Manager
-**Files:** `include/process.h`, `src/process.c`, `src/firstrunwrapper.s`
+**Files:** `include/process.h`, `src/process/process.c`, `src/process/firstrunwrapper.s`
 
 | Endpoint | Description |
 | :--- | :--- |
@@ -169,7 +121,7 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `syscall kill(pid id)` | Terminates a process, deallocates its stack (`free_stack`), removes it from its active queue (ready queue, semaphore lobby, or delta list), and frees its table slot. |
 
 ### Interrupt Manager
-**Files:** `include/interrupt.h`, `src/interrupt.c`, `src/interruptdispatcher.s`, `include/hardwaredef.h`
+**Files:** `include/interrupt.h`, `src/interrupt/interrupt.c`, `src/interrupt/interruptdispatcher.s`, `include/hardwaredef.h`
 
 | Endpoint | Description |
 | :--- | :--- |
@@ -177,7 +129,7 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `void interrupt_restore(intmask mask)` | Restores supervisor interrupts to the given mask state (exits critical section). |
 
 ### CPU Scheduler
-**Files:** `include/scheduler.h`, `src/scheduler.c`, `src/cswtch.s`, `include/schedqueue.h`, `src/schedqueue.c`
+**Files:** `include/scheduler.h`, `src/scheduler/scheduler.c`, `src/scheduler/cswtch.s`, `include/schedqueue.h`, `src/scheduler/schedqueue.c`
 
 | Endpoint | Description |
 | :--- | :--- |
@@ -186,7 +138,7 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `syscall scheduler_remove(pid id)` | Removes a process from the scheduler's ready queue by PID. |
 
 ### Semaphore Manager
-**Files:** `include/semaphore.h`, `src/semaphore.c`, `include/lobby.h`, `src/lobby.c`
+**Files:** `include/semaphore.h`, `src/semaphore/semaphore.c`
 
 | Endpoint | Description |
 | :--- | :--- |
@@ -197,7 +149,7 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `syscall sem_abort(sem id, pid proc_id)` | Removes a waiting process from a semaphore without granting the resource. |
 
 ### Timed Event Manager
-**Files:** `include/delta.h`, `src/delta.c`, `include/sleep.h`, `src/sleep.c`
+**Files:** `include/delta.h`, `src/timed/delta.c`, `include/sleep.h`, `src/timed/sleep.c`
 
 | Endpoint | Description |
 | :--- | :--- |
@@ -205,7 +157,7 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `syscall unsleep(pid id)` | Cancels a sleeping process's timer early, removing it from the delta list and calling `resume()`. |
 
 ### Console Driver
-**Files:** `include/kprint.h`, `src/kprint.c`
+**Files:** `include/kprint.h`, `src/console/kprint.c`
 
 | Endpoint | Description |
 | :--- | :--- |
@@ -215,14 +167,25 @@ This section describes each subsystem shown in the architecture flowchart below,
 | `void kprintf(const char *format, ...)` | Kernel formatted printing function supporting `%d`, `%i`, `%u`, `%x`, `%p`, `%c`, and `%s`. |
 | `void kvprintf(const char *format, va_list arg)` | Core variadic formatted string emitter writing directly to UART. |
 
+### Shared Kernel Data Structures
+**Files:** `include/lobby.h`, `src/common/lobby.c`
+
+| Endpoint | Description |
+| :--- | :--- |
+| `void lobby_init(void)` | Initializes the wait-queue lobby table entries to empty. |
+| `status_code lobby_dequeue(struct LobbyEntry *head, pid *id)` | Removes and returns the process at the head of the wait queue. |
+| `status_code lobby_enqueue(struct LobbyEntry *head, pid id, int32 delta)` | Inserts a process into the wait queue sorted by key/delta value. |
+| `status_code lobby_peek(struct LobbyEntry *head, pid *id, int32 *delta)` | Inspects the head process and delta without removing it. |
+| `status_code lobby_remove(struct LobbyEntry *head, pid id)` | Removes a specific process from the wait queue by PID, adjusting successor deltas. |
+
 ### Hardware & Execution Layers
-**Files:** `include/clock.h`, `src/clock.c`, `include/hardwaredef.h`, `include/kmain.h`, `src/kmain.c`
+**Files:** `include/clock.h`, `src/timed/clock.c`, `include/hardwaredef.h`, `include/kmain.h`, `src/core/kmain.c`, `src/core/kernel.c`, `src/core/boot.s`
 
 | Subsystem / Component | Files | Endpoints / Operations | Description |
 | :--- | :--- | :--- | :--- |
-| **RISC-V Timer (`stimecmp`)** | `include/clock.h`, `src/clock.c`, `include/hardwaredef.h` | `read_time()`, `write_stimecmp()` | Hardware timer CSR read/write accessors. |
-| **16550 UART Serial** | `include/kprint.h` | Memory-mapped I/O (`UART_ADDR`) | Physical 16550 UART hardware chip mapped at address `0x10000000`. |
-| **Active Processes** | `include/kmain.h`, `src/kmain.c` | `kmain()` | Entry point for the first kernel process (`kmain`) and subsequent user tasks. |
+| **RISC-V Timer (`stimecmp`)** | `include/clock.h`, `src/timed/clock.c`, `include/hardwaredef.h` | `read_time()`, `write_stimecmp()` | Hardware timer CSR read/write accessors. |
+| **16550 UART Serial** | `include/kprint.h`, `src/console/kprint.c` | Memory-mapped I/O (`UART_ADDR`) | Physical 16550 UART hardware chip mapped at address `0x10000000`. |
+| **Active Processes & Core** | `include/kmain.h`, `src/core/kmain.c`, `src/core/kernel.c`, `src/core/boot.s` | `__kentry()`, `kmain()` | Entry point for system bootstrap (`boot.s`), kernel init (`__kentry`), and first process (`kmain`). |
 
 ## System Architecture
 
