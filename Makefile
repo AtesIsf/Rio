@@ -38,10 +38,10 @@ OBJS     := $(ASM_OBJS) $(C_OBJS)
 DEPS     := $(C_OBJS:.o=.d)
 
 .PHONY: all build run clean \
-        container-image docker-image podman-image \
-        container-run docker-run podman-run \
-        container-build docker-build podman-build \
-        container-clean docker-clean podman-clean
+        docker-image podman-image \
+        docker-run podman-run \
+        docker-build podman-build \
+        docker-clean podman-clean
 
 all: build
 
@@ -77,19 +77,19 @@ CONTAINER_IMAGE  ?= rio
 CHECK_ENGINE     := @if [ -z "$(CONTAINER_ENGINE)" ]; then echo "Error: neither podman nor docker found in PATH" >&2; exit 1; fi
 
 # Container targets (delegates execution inside a container)
-container-image docker-image podman-image:
+docker-image podman-image:
 	$(CHECK_ENGINE)
 	$(CONTAINER_ENGINE) build -t $(CONTAINER_IMAGE) .
 
-container-run docker-run podman-run:
+docker-run podman-run:
 	$(CHECK_ENGINE)
 	$(CONTAINER_ENGINE) run --rm -it -v $$(pwd):/rio $(CONTAINER_IMAGE)
 
-container-build docker-build podman-build:
+docker-build podman-build:
 	$(CHECK_ENGINE)
 	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make build
 
-container-clean docker-clean podman-clean:
+docker-clean podman-clean:
 	$(CHECK_ENGINE)
 	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make clean
 
