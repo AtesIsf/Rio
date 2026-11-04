@@ -25,23 +25,31 @@ LDLIBS  ?= -lgcc
 SRC_DIR       := src
 INC_DIR       := include
 BIN_DIR       := bin
+TEST_DIR      := test
 LINKER_SCRIPT := linker.ld
 TARGET        := rio.elf
+TEST_TARGET   := rio-test.elf
 
 # Source and object files
-C_SRCS   := $(shell find $(SRC_DIR) -name '*.c')
-ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s')
+C_SRCS    := $(shell find $(SRC_DIR) -name '*.c')
+ASM_SRCS  := $(shell find $(SRC_DIR) -name '*.s')
 
-C_OBJS   := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(C_SRCS))
-ASM_OBJS := $(patsubst $(SRC_DIR)/%.s,$(BIN_DIR)/%.o,$(ASM_SRCS))
-OBJS     := $(ASM_OBJS) $(C_OBJS)
-DEPS     := $(C_OBJS:.o=.d)
+C_OBJS    := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(C_SRCS))
+ASM_OBJS  := $(patsubst $(SRC_DIR)/%.s,$(BIN_DIR)/%.o,$(ASM_SRCS))
+OBJS      := $(ASM_OBJS) $(C_OBJS)
+DEPS      := $(C_OBJS:.o=.d)
 
-.PHONY: all build run clean \
+# Test source and object files
+TEST_SRCS := $(shell find $(TEST_DIR) -name '*.c' 2>/dev/null)
+TEST_OBJS := $(ASM_OBJS) $(filter-out $(BIN_DIR)/core/kmain.o,$(C_OBJS)) $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/test/%.o,$(TEST_SRCS))
+TEST_DEPS := $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/test/%.d,$(TEST_SRCS))
+
+.PHONY: all build run clean test test-build \
         docker-image podman-image \
         docker-run podman-run \
         docker-build podman-build \
-        docker-clean podman-clean
+        docker-clean podman-clean \
+        docker-test podman-test
 
 all: build
 
@@ -69,9 +77,22 @@ $(BIN_DIR):
 run: $(TARGET)
 	$(QEMU) -machine virt -bios none -kernel $(TARGET) -serial mon:stdio
 
+# Test build and execution
+test-build: $(TEST_TARGET)
+
+$(TEST_TARGET): $(TEST_OBJS) $(LINKER_SCRIPT)
+	$(CC) $(LDFLAGS) $(TEST_OBJS) -o $@ $(LDLIBS)
+
+$(BIN_DIR)/test/%.o: $(TEST_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -I$(TEST_DIR) -MMD -MP -c $< -o $@
+
+test: $(TEST_TARGET)
+	$(QEMU) -machine virt -bios none -kernel $(TEST_TARGET) -serial mon:stdio -nographic
+
 # Clean build artifacts
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(TEST_TARGET)
 	rm -rf $(BIN_DIR)/*
 
 # Container engine configuration (auto-detect podman or docker)
@@ -96,5 +117,9 @@ docker-clean podman-clean:
 	$(CHECK_ENGINE)
 	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make clean
 
+docker-test podman-test:
+	$(CHECK_ENGINE)
+	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make test
+
 # Include auto-generated header dependencies
--include $(DEPS)
+-include $(DEPS) $(TEST_DEPS)
