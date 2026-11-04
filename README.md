@@ -207,6 +207,7 @@ flowchart TD
         SEM["Semaphore Manager"]
         TIMED["Timed Event Manager"]
         CONSOLE["Console Driver"]
+        DS["Shared Data Structures (Lobby)"]
     end
 
     subgraph Exec ["Execution"]
@@ -239,6 +240,11 @@ flowchart TD
     INT -.->|"Clock interrupt (delta_tick)"| TIMED
     TIMED -->|"resume"| PROC
     TIMED -->|"yield"| SCHED
+
+    %% Shared Kernel Data Structures
+    SEM -->|"lobby_enqueue, lobby_dequeue"| DS
+    TIMED -->|"lobby_enqueue, lobby_dequeue"| DS
+    PROC -.->|"lobby_remove"| DS
 
     %% Task Execution & I/O
     TASKS -->|"create, resume, kill"| PROC
