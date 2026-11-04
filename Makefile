@@ -1,106 +1,66 @@
-# Toolchain configuration
-# Auto-detect toolchain prefix if not explicitly specified:
-# Arch Linux / Homebrew use 'riscv64-elf-'
-# Debian / Ubuntu / Fedora use 'riscv64-unknown-elf-'
-ifeq ($(origin CROSS_COMPILE), undefined)
-    ifneq ($(shell which riscv64-elf-gcc 2>/dev/null),)
-        CROSS_COMPILE := riscv64-elf-
-    else ifneq ($(shell which riscv64-unknown-elf-gcc 2>/dev/null),)
-        CROSS_COMPILE := riscv64-unknown-elf-
-    else
-        CROSS_COMPILE := riscv64-elf-
-    endif
-endif
-
+CROSS_COMPILE ?= $(shell which riscv64-elf-gcc >/dev/null 2>&1 && echo riscv64-elf- || echo riscv64-unknown-elf-)
 CC            := $(CROSS_COMPILE)gcc
 AS            := $(CROSS_COMPILE)as
 QEMU          := qemu-system-riscv64
 
-# Compilation and linking flags
-CFLAGS  ?= -Wall -Wextra -mcmodel=medany -ffreestanding -std=c23 -I$(INC_DIR)
-LDFLAGS ?= -T $(LINKER_SCRIPT) -nostdlib
-LDLIBS  ?= -lgcc
+CFLAGS        ?= -Wall -Wextra -mcmodel=medany -ffreestanding -std=c23 -Iinclude
+LDFLAGS       ?= -T linker.ld -nostdlib
+LDLIBS        ?= -lgcc
 
-# Project directories and files
-SRC_DIR       := src
-INC_DIR       := include
-BIN_DIR       := bin
-TEST_DIR      := test
-LINKER_SCRIPT := linker.ld
 TARGET        := rio.elf
 TEST_TARGET   := rio-test.elf
+BIN_DIR       := bin
 
-# Source and object files
-C_SRCS    := $(shell find $(SRC_DIR) -name '*.c')
-ASM_SRCS  := $(shell find $(SRC_DIR) -name '*.s')
+C_SRCS        := $(shell find src -name '*.c')
+ASM_SRCS      := $(shell find src -name '*.s')
+C_OBJS        := $(patsubst src/%.c,$(BIN_DIR)/%.o,$(C_SRCS))
+ASM_OBJS      := $(patsubst src/%.s,$(BIN_DIR)/%.o,$(ASM_SRCS))
+OBJS          := $(ASM_OBJS) $(C_OBJS)
 
-C_OBJS    := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(C_SRCS))
-ASM_OBJS  := $(patsubst $(SRC_DIR)/%.s,$(BIN_DIR)/%.o,$(ASM_SRCS))
-OBJS      := $(ASM_OBJS) $(C_OBJS)
-DEPS      := $(C_OBJS:.o=.d)
+TEST_SRCS     := $(shell find test -name '*.c' 2>/dev/null)
+TEST_OBJS     := $(ASM_OBJS) $(filter-out $(BIN_DIR)/core/kmain.o,$(C_OBJS)) $(patsubst test/%.c,$(BIN_DIR)/test/%.o,$(TEST_SRCS))
 
-# Test source and object files
-TEST_SRCS := $(shell find $(TEST_DIR) -name '*.c' 2>/dev/null)
-TEST_OBJS := $(ASM_OBJS) $(filter-out $(BIN_DIR)/core/kmain.o,$(C_OBJS)) $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/test/%.o,$(TEST_SRCS))
-TEST_DEPS := $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/test/%.d,$(TEST_SRCS))
+.PHONY: all build run test test-build clean \
+        docker-image podman-image docker-run podman-run \
+        docker-% podman-%
 
-.PHONY: all build run clean test test-build \
-        docker-image podman-image \
-        docker-run podman-run \
-        docker-build podman-build \
-        docker-clean podman-clean \
-        docker-test podman-test
+all build: $(TARGET)
 
-all: build
-
-build: $(TARGET)
-
-# Link the kernel ELF
-$(TARGET): $(OBJS) $(LINKER_SCRIPT)
+$(TARGET): $(OBJS) linker.ld
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LDLIBS)
 
-# Compile C source files
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.c
+test-build: $(TEST_TARGET)
+
+$(TEST_TARGET): $(TEST_OBJS) linker.ld
+	$(CC) $(LDFLAGS) $(TEST_OBJS) -o $@ $(LDLIBS)
+
+$(BIN_DIR)/%.o: src/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
-# Assemble assembly files
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.s
+$(BIN_DIR)/%.o: src/%.s
 	@mkdir -p $(dir $@)
 	$(AS) -c $< -o $@
 
-# Ensure output directory exists
-$(BIN_DIR):
-	mkdir -p $(BIN_DIR)
+$(BIN_DIR)/test/%.o: test/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -Itest -MMD -MP -c $< -o $@
 
-# Run kernel in QEMU
 run: $(TARGET)
 	$(QEMU) -machine virt -bios none -kernel $(TARGET) -serial mon:stdio
-
-# Test build and execution
-test-build: $(TEST_TARGET)
-
-$(TEST_TARGET): $(TEST_OBJS) $(LINKER_SCRIPT)
-	$(CC) $(LDFLAGS) $(TEST_OBJS) -o $@ $(LDLIBS)
-
-$(BIN_DIR)/test/%.o: $(TEST_DIR)/%.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -I$(TEST_DIR) -MMD -MP -c $< -o $@
 
 test: $(TEST_TARGET)
 	$(QEMU) -machine virt -bios none -kernel $(TEST_TARGET) -serial mon:stdio -nographic
 
-# Clean build artifacts
 clean:
 	rm -f $(TARGET) $(TEST_TARGET)
 	rm -rf $(BIN_DIR)/*
 
-# Container engine configuration (auto-detect podman or docker)
+# Container engine integration
 CONTAINER_ENGINE ?= $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null)
 CONTAINER_IMAGE  ?= rio
-CHECK_ENGINE     := @if [ -z "$(CONTAINER_ENGINE)" ]; then echo "Error: neither podman nor docker found in PATH" >&2; exit 1; fi
+CHECK_ENGINE     := @if [ -z "$(CONTAINER_ENGINE)" ]; then echo "Error: podman/docker not found" >&2; exit 1; fi
 
-# Container targets (delegates execution inside a container)
 docker-image podman-image:
 	$(CHECK_ENGINE)
 	$(CONTAINER_ENGINE) build -t $(CONTAINER_IMAGE) .
@@ -109,17 +69,8 @@ docker-run podman-run:
 	$(CHECK_ENGINE)
 	$(CONTAINER_ENGINE) run --rm -it -v $$(pwd):/rio $(CONTAINER_IMAGE)
 
-docker-build podman-build:
+docker-% podman-%:
 	$(CHECK_ENGINE)
-	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make build
+	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make $*
 
-docker-clean podman-clean:
-	$(CHECK_ENGINE)
-	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make clean
-
-docker-test podman-test:
-	$(CHECK_ENGINE)
-	$(CONTAINER_ENGINE) run --rm -v $$(pwd):/rio $(CONTAINER_IMAGE) make test
-
-# Include auto-generated header dependencies
--include $(DEPS) $(TEST_DEPS)
+-include $(C_OBJS:.o=.d) $(patsubst test/%.c,$(BIN_DIR)/test/%.d,$(TEST_SRCS))

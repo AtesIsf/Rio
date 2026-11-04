@@ -56,36 +56,30 @@ Package details:
 
 ## Makefile Guide
 
-The provided Makefile supports both native development and containerized development (auto-detecting `podman` or `docker`):
+The provided Makefile supports both native and containerized development (auto-detecting `podman` or `docker`). Any native target can be run inside a container via `podman-<target>` or `docker-<target>`:
 
 - **Build kernel binary** (`rio.elf`):
   ```bash
-  # Native:
-  make build
-
-  # Container (Podman / Docker):
-  make podman-build   # or: make docker-build
+  make build          # Container: make podman-build / make docker-build
   ```
 
 - **Run in QEMU**:
-  Runs the compiled kernel binary (`rio.elf`) inside QEMU using the RISC-V virt machine with direct serial console output.
+  Runs the compiled kernel binary (`rio.elf`) inside QEMU using the RISC-V virt machine with direct serial console output. Press `Ctrl+A` followed by `X` to exit.
   ```bash
-  # Native:
-  make run
-
-  # Container (Podman / Docker):
-  make podman-run     # or: make docker-run
+  make run            # Container interactive shell: make podman-run
   ```
-  To exit QEMU, press `Ctrl+A` followed by `X`.
+
+- **Run test suite** (`rio-test.elf`):
+  Builds and runs the bare-metal test suite headlessly in QEMU, self-terminating via the SiFive test finisher device upon completion.
+  ```bash
+  make test           # Container: make podman-test / make docker-test
+  make test-build     # Compile test binary without running
+  ```
 
 - **Clean build artifacts**:
-  Deletes all generated binary files (`bin/`, `rio.elf`).
+  Deletes compiled binaries (`rio.elf`, `rio-test.elf`) and object files in `bin/` while preserving directory tracking.
   ```bash
-  # Native:
-  make clean
-
-  # Container (Podman / Docker):
-  make podman-clean   # or: make docker-clean
+  make clean          # Container: make podman-clean / make docker-clean
   ```
 
 - **Build container image**:
