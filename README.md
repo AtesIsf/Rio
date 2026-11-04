@@ -12,7 +12,9 @@ Kaashoek, and Rober Morris.
 
 ## Table of Contents
 
-- [Installation (Arch Linux)](#installation-arch-linux)
+- [Installation](#installation)
+  - [Option 1: Docker / Podman (Recommended, OS-Agnostic)](#option-1-docker--podman-recommended-os-agnostic)
+  - [Option 2: Native Installation (Arch Linux)](#option-2-native-installation-arch-linux)
 - [Makefile Guide](#makefile-guide)
 - [Project Structure](#project-structure)
 - [Modules](#modules)
@@ -26,9 +28,31 @@ Kaashoek, and Rober Morris.
   - [Hardware & Execution Layers](#hardware--execution-layers)
 - [System Architecture](#system-architecture)
 
-## Installation (Arch Linux)
+## Installation
 
-To compile and run RIO on Arch Linux, install the RISC-V bare-metal toolchain, 
+### Option 1: Docker / Podman (Recommended, OS-Agnostic)
+
+RIO provides a minimal container environment based on `debian:stable-slim` containing the pre-configured 64-bit RISC-V cross-compilation toolchain and QEMU emulator. The `Makefile` automatically detects whether Podman or Docker is installed.
+
+1. **Build the container image** (run once):
+   ```bash
+   make podman-image
+   # or with docker:
+   make docker-image
+   ```
+
+2. **Run RIO in QEMU**:
+   ```bash
+   make podman-run
+   # or with docker:
+   make docker-run
+   ```
+
+To exit QEMU, press `Ctrl+A` followed by `X`.
+
+### Option 2: Native Installation (Arch Linux)
+
+To compile and run RIO natively on Arch Linux, install the RISC-V bare-metal toolchain, 
 GNU Make, and QEMU:
 
 ```bash
@@ -37,39 +61,49 @@ sudo pacman -S base-devel riscv64-elf-gcc riscv64-elf-binutils qemu-system-riscv
 
 Package details:
 - `base-devel`: Provides GNU `make` and essential compilation utilities.
-- `riscv64-elf-gcc`: GCC cross-compiler targeting 64-bit bare-metal RISC-V
-- `riscv64-elf-binutils`: Assembler and binary utilities for RISC-V 
-(`riscv64-elf-as`).
-- `qemu-system-riscv`: QEMU system emulator for RISC-V, providing
-`qemu-system-riscv64`.
+- `riscv64-elf-gcc`: GCC cross-compiler targeting 64-bit bare-metal RISC-V.
+- `riscv64-elf-binutils`: Assembler and binary utilities for RISC-V (`riscv64-elf-as`).
+- `qemu-system-riscv`: QEMU system emulator for RISC-V (`qemu-system-riscv64`).
 
 ## Makefile Guide
 
-The provided Makefile contains three primary targets:
+The provided Makefile supports both native development and containerized development (auto-detecting `podman` or `docker`):
 
-- `make` or `make build`:
-Build the operating system binary into a file called `rio.elf`.
+- **Build kernel binary** (`rio.elf`):
+  ```bash
+  # Native:
+  make build
 
-```bash
-make build
-```
+  # Container (Podman / Docker):
+  make podman-build   # or: make docker-build
+  ```
 
-- `make run`:
-Runs the compiled kernel binary (`rio.elf`) inside QEMU using the RISC-V virt
-machine with direct serial console output.
+- **Run in QEMU**:
+  Runs the compiled kernel binary (`rio.elf`) inside QEMU using the RISC-V virt machine with direct serial console output.
+  ```bash
+  # Native:
+  make run
 
-```bash
-make run
-```
+  # Container (Podman / Docker):
+  make podman-run     # or: make docker-run
+  ```
+  To exit QEMU, press `Ctrl+A` followed by `X`.
 
-To exit QEMU, press `Ctrl+A` followed by `X`.
+- **Clean build artifacts**:
+  Deletes all generated binary files (`bin/*.o`, `bin/*.d`, `rio.elf`).
+  ```bash
+  # Native:
+  make clean
 
-- `make clean`:
-Deletes all generated binary files
+  # Container (Podman / Docker):
+  make podman-clean   # or: make docker-clean
+  ```
 
-```bash
-make clean
-```
+- **Build container image**:
+  Builds the minimal Debian-based container image (`rio`):
+  ```bash
+  make podman-image   # or: make docker-image
+  ```
 
 ## Project Structure
 
@@ -110,7 +144,9 @@ rio/
 │   ├── scheduler.c            # Process scheduler implementation (yield)
 │   ├── semaphore.c            # Counting semaphore implementation (sem_create, sem_wait, sem_release, sem_free)
 │   └── sleep.c                # Process sleep management (sleep, unsleep)
+├── .dockerignore              # Ignore rules for container builds
 ├── compile_flags.txt          # Compiler flags for clangd and language servers
+├── Dockerfile                 # Minimal Debian-based container definition
 ├── LICENSE                    # GNU General Public License v3
 ├── linker.ld                  # Linker script mapping sections to the RAM base address
 ├── Makefile                   # Build rules and QEMU execution targets
