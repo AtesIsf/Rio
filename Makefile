@@ -29,8 +29,8 @@ LINKER_SCRIPT := linker.ld
 TARGET        := rio.elf
 
 # Source and object files
-C_SRCS   := $(wildcard $(SRC_DIR)/*.c)
-ASM_SRCS := $(wildcard $(SRC_DIR)/*.s)
+C_SRCS   := $(shell find $(SRC_DIR) -name '*.c')
+ASM_SRCS := $(shell find $(SRC_DIR) -name '*.s')
 
 C_OBJS   := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(C_SRCS))
 ASM_OBJS := $(patsubst $(SRC_DIR)/%.s,$(BIN_DIR)/%.o,$(ASM_SRCS))
@@ -52,11 +52,13 @@ $(TARGET): $(OBJS) $(LINKER_SCRIPT)
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LDLIBS)
 
 # Compile C source files
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.c | $(BIN_DIR)
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 # Assemble assembly files
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.s | $(BIN_DIR)
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.s
+	@mkdir -p $(dir $@)
 	$(AS) -c $< -o $@
 
 # Ensure output directory exists
@@ -69,7 +71,8 @@ run: $(TARGET)
 
 # Clean build artifacts
 clean:
-	rm -f $(TARGET) $(BIN_DIR)/*.o $(BIN_DIR)/*.d
+	rm -f $(TARGET)
+	rm -rf $(BIN_DIR)/*
 
 # Container engine configuration (auto-detect podman or docker)
 CONTAINER_ENGINE ?= $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null)
