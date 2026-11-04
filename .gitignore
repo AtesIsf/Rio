@@ -34,8 +34,8 @@ qemu.log
 trace-*
 .gdb_history
 gdb.txt
-core
-core.*
+/core
+/core.*
 
 # Language server and compilation database
 compile_commands.json
