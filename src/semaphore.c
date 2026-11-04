@@ -118,3 +118,28 @@ syscall sem_free(sem id) {
     return OK;
 }
 
+/**
+ * Removes a waiting process from the semaphore's queue and adjusts the counter.
+ * Returns OK on success, and ERR if the given semaphore or pid is invalid,
+ * or the operation fails.
+ */
+
+syscall sem_abort(sem id, pid proc_id) {
+    intmask mask = interrupt_save();
+
+    if (!validsem(id) || !validpid(proc_id)
+        || g_semaphores[id].state == SEM_FREE) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
+    status_code result = lobby_remove(&g_semaphores[id].head, proc_id);
+    if (result == OK) {
+        g_semaphores[id].count++;
+    }
+
+    interrupt_restore(mask);
+    return result;
+}
+
+

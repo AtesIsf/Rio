@@ -54,3 +54,44 @@ syscall yield() {
     return OK;
 }
 
+/**
+ * Adds the process with the given pid to the scheduler's ready queue.
+ * Returns OK on success, and ERR if the given id is invalid or the
+ * operation fails.
+ */
+
+syscall scheduler_add(pid id) {
+    intmask mask = interrupt_save();
+
+    if (!validpid(id)) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
+    status_code code = sched_queue_enqueue(id, g_process_table[id].priority);
+
+    interrupt_restore(mask);
+    return code;
+}
+
+/**
+ * Removes the process with the given pid from the scheduler's ready queue.
+ * Returns OK on success, and ERR if the given id is invalid or the
+ * operation fails.
+ */
+
+syscall scheduler_remove(pid id) {
+    intmask mask = interrupt_save();
+
+    if (!validpid(id)) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
+    status_code code = sched_queue_remove(id);
+
+    interrupt_restore(mask);
+    return code;
+}
+
+

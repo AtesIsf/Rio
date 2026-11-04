@@ -126,7 +126,7 @@ syscall resume(pid id) {
         return ERR;
     }
 
-    status_code code = sched_queue_enqueue(id, g_process_table[id].priority);
+    status_code code = scheduler_add(id);
     if (code == ERR) {
         interrupt_restore(mask);
         return ERR;
@@ -163,14 +163,12 @@ syscall kill(pid id) {
             break;
 
         case PROC_READY:
-            sched_queue_remove(id);
+            scheduler_remove(id);
             g_process_table[id].state = PROC_EMPTY;
             break;
 
         case PROC_WAIT:
-            sem sem_id = g_process_table[id].sem_id;
-            lobby_remove(&g_semaphores[sem_id].head, id);
-            g_semaphores[sem_id].count++;
+            sem_abort(g_process_table[id].sem_id, id);
             g_process_table[id].sem_id = -1;
             g_process_table[id].state = PROC_EMPTY;
             break;

@@ -13,4 +13,8 @@ extern void cswtch(struct Context *prev, struct Context *next);
 
 syscall yield();
 
+syscall scheduler_add(pid id);
+
+syscall scheduler_remove(pid id);
+
 #endif

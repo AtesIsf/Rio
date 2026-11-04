@@ -38,6 +38,8 @@ syscall sem_create(int32 count, sem *id);
 
 syscall sem_free(sem id);
 
+syscall sem_abort(sem id, pid proc_id);
+
 #define validsem(x) (x < N_SEM && x >= 0)
 
 #endif
