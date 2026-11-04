@@ -198,10 +198,10 @@ flowchart TD
     SCHED -.->|"Context switch"| TASKS
 
     %% Concurrency & Critical Sections
-    SCHED -.->|"interrupt_save, interrupt_restore"| INT
-    PROC -.->|"interrupt_save, interrupt_restore"| INT
-    SEM -.->|"interrupt_save, interrupt_restore"| INT
-    TIMED -.->|"interrupt_save, interrupt_restore"| INT
+    SCHED -.->|"interrupt_save / restore"| INT
+    PROC -.->|"interrupt_save / restore"| INT
+    SEM -.->|"interrupt_save / restore"| INT
+    TIMED -.->|"interrupt_save / restore"| INT
 
     %% Process & Memory Interactions
     PROC -->|"get_stack, free_stack"| MEM
@@ -225,4 +225,7 @@ flowchart TD
     TASKS -->|"chef_malloc, get_heap, free_heap"| MEM
     TASKS -->|"kprintf, kputs, kprint"| CONSOLE
     CONSOLE -->|"kputc"| HW_UART
+
+    %% Style dotted links prominently
+    linkStyle 0,2,3,4,5,6,14 stroke-dasharray: 5 5;
 ```
