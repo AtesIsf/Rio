@@ -34,21 +34,12 @@ Kaashoek, and Rober Morris.
 
 RIO provides a minimal container environment based on `debian:stable-slim` containing the pre-configured 64-bit RISC-V cross-compilation toolchain and QEMU emulator. The `Makefile` automatically detects whether Podman or Docker is installed.
 
-1. **Build the container image** (run once):
-   ```bash
-   make podman-image
-   # or with docker:
-   make docker-image
-   ```
-
-2. **Run RIO in QEMU**:
-   ```bash
-   make podman-run
-   # or with docker:
-   make docker-run
-   ```
-
-To exit QEMU, press `Ctrl+A` followed by `X`.
+To build the container image:
+```bash
+make podman-image
+# or with docker:
+make docker-image
+```
 
 ### Option 2: Native Installation (Arch Linux)
 
