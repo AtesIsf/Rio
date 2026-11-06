@@ -13,6 +13,7 @@
 #include <ktypes.h>
 #include <lobby.h>
 #include <memory.h>
+#include <panic.h>
 #include <process.h>
 #include <schedqueue.h>
 #include <scheduler.h>
