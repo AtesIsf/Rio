@@ -1,7 +1,35 @@
 #include <rio.h>
 
-// exported from the linker, first address after the kernel, 16 byte aligned
-extern byte *kernel_end;
+// exported from the linker, first byte after the kernel, 16 byte aligned
+extern byte kernel_end;
+
+static uint64 n_pages; // number of pages in the RAM
+static byte *pages_start; // where the pages start from
+
+/* static inline bitmap helper functions */
+
+static inline void set_page_allocated(uint64 page_index) {
+    if (page_index >= n_pages) {
+        return;
+    }
+    pages_start[page_index / 8] |= (1U << (page_index % 8));
+}
+
+static inline void clear_page_allocated(uint64 page_index) {
+    if (page_index >= n_pages) {
+        return;
+    }
+    pages_start[page_index / 8] &= ~(1U << (page_index % 8));
+}
+
+static inline bool is_page_allocated(uint64 page_index) {
+    if (page_index >= n_pages) {
+        return true;
+    }
+    return (pages_start[page_index / 8] & (1U << (page_index % 8))) != 0;
+}
+
+/* exposed functions */
 
 /**
  * Initializes the kernel memory subsystem and sets up the necessary
@@ -9,29 +37,43 @@ extern byte *kernel_end;
  */
 
 void mem_init() {
-    byte *mem_start = (byte *) PAGE_ROUND_UP((uint64) kernel_end);
-    uint64 n_pages = (RAM_END - (uint64) mem_start) / PAGE_SIZE;
+    pages_start = (byte *) PAGE_ROUND_UP((uint64) &kernel_end);
+    n_pages = (RAM_END - (uint64) pages_start) / PAGE_SIZE;
 
-    // calculate #necessary bits
+    // calculate #necessary bytes (round up n_pages)
+    uint64 bytes_required = ((n_pages + 7) & (~7)) / (sizeof(byte) * 8);
 
     // calculate the necessary amount of metadata pages
+    uint64 pages_needed = PAGE_ROUND_UP(bytes_required) / PAGE_SIZE;
+
+    // zero out the metadata pages so all pages initially start as free (0)
+    for (uint64 i = 0; i < PAGE_ROUND_UP(bytes_required); i++) {
+        pages_start[i] = 0;
+    }
 
     // sets those # of metadata pages from the start to be allocated
+    for (uint64 i = 0; i < pages_needed; i++) {
+        set_page_allocated(i);
+    }
 }
 
 syscall get_stack(byte *top, int32 n) {
+    panic("unimplemented get_stack");
     return ERR;
 }
 
 syscall get_heap(byte *top, int32 n) {
+    panic("unimplemented get_heap");
     return ERR;
 }
 
 syscall free_stack(byte *top, int32 n) {
+    panic("unimplemented free_stack");
     return ERR;
 }
 
 syscall free_heap(byte *top, int32 n) {
+    panic("unimplemented free_heap");
     return ERR;
 }
 

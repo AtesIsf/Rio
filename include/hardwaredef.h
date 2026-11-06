@@ -8,6 +8,10 @@
  * what RISC-V expects. They are defined in this file.
  */
 
+
+#define PAGE_SIZE (4096) // assume 4 KiB page size
+#define RAM_SIZE (128 * 1024 * 1024) // QEMU gives 128 MB RAM by default
+
 // on first run, interrupts are enabled and the function returns to s-mode
 #define INITIAL_PROCESS_SSTATUS (SSTATUS_SIE | SSTATUS_SPP)
 

@@ -11,9 +11,9 @@
  * specify number of requested pages (in 4KB).
  *
  * Main Idea: Sacrifice the first page to store metadata.
- * Place the MemMetadata struct there. Calculate the number of pages required
- * to store the said metadata (bitmap of used/free pages). Remember to keep
- * the data structure 16-byte aligned.
+ * Place the page usage bitmap there. Calculate the number of pages required
+ * to store the said metadata. Remember to keep the data structure
+ * 16-byte aligned.
  *
  * The comment below is taken from xv6
  *
@@ -34,9 +34,7 @@
 #define KERNEL_BASE (0x80000000L)
 
 // QEMU defaults to 128 MB of RAM
-#define RAM_END (KERNEL_BASE + 128 * 1024 * 1024)
-
-#define PAGE_SIZE (4096)
+#define RAM_END (KERNEL_BASE + RAM_SIZE)
 
 /* helper macros */
 #define PAGE_ROUND_UP(x)  (((x) + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1))
