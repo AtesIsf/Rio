@@ -41,22 +41,22 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
         return ERR;
     }
 
+    // allocate proc heap space first to ensure kmain isn't screwed
+    byte *hp = NULL;
+    status_code result = kalloc(hp, n_heap_pages);
+    if (result == ERR) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
     byte *stk = NULL;
-    status_code result = kalloc(stk, n_stack_pages);
+    result = kalloc(stk, n_stack_pages);
     if (result == ERR) {
         interrupt_restore(mask);
         return ERR;
     }
     // already 16-byte aligned, move sp to top
     uint64 sp = ((uint64) stk) + (n_stack_pages * PAGE_SIZE);
-
-    // allocate proc heap space as well
-    byte *hp = NULL;
-    result = kalloc(hp, n_heap_pages);
-    if (result == ERR) {
-        interrupt_restore(mask);
-        return ERR;
-    }
 
     // if n_args > 8, then the rest are placed on the stack in risc-v
     // must be in 16-byte aligned chunks.
