@@ -17,10 +17,8 @@ This document describes each subsystem shown in the architecture flowchart, incl
 
 | Endpoint | Description |
 | :--- | :--- |
-| `syscall get_stack(byte *top, int32 n)` | Allocates `n` contiguous 4 KiB pages for a process stack. Returns `OK` or `ERR`. |
-| `syscall free_stack(byte *top, int32 n)` | Deallocates `n` contiguous 4 KiB stack pages starting at `top`. Returns `OK` or `ERR`. |
-| `syscall get_heap(byte *start, int32 n)` | Allocates `n` contiguous 4 KiB pages to serve as a heap region. Returns `OK` or `ERR`. |
-| `syscall free_heap(byte *start, int32 n)` | Deallocates `n` contiguous 4 KiB heap pages starting at `start`. Returns `OK` or `ERR`. |
+| `syscall kalloc(byte *base, int32 n)` | Allocates `n` contiguous 4 KiB physical pages and writes the starting address to `base`. Returns `OK` or `ERR`. |
+| `syscall kfree(byte *base, int32 n)` | Deallocates `n` contiguous 4 KiB physical pages starting at `base`. Returns `OK` or `ERR`. |
 
 ## Process Manager
 **Files:** `include/process.h`, `src/process/process.c`, `src/process/firstrunwrapper.s`
@@ -29,7 +27,7 @@ This document describes each subsystem shown in the architecture flowchart, incl
 | :--- | :--- |
 | `syscall create(void *fn, int32 priority, uint32 n_stack_pages, uint32 n_heap_pages, const char *name, int32 n_args, ...)` | Allocates stack and heap pages, configures initial register context and arguments, and sets up a new suspended process (`PROC_SUSP`). Returns PID or `ERR`. |
 | `syscall resume(pid id)` | Transitions a process to `PROC_READY`, inserts it into the scheduler ready queue, and triggers preemption (`yield()`). |
-| `syscall kill(pid id)` | Terminates a process, deallocates its stack (`free_stack`), removes it from its active queue (ready queue, semaphore lobby, or delta list), and frees its table slot. |
+| `syscall kill(pid id)` | Terminates a process, deallocates its stack and heap (`kfree`), removes it from its active queue (ready queue, semaphore lobby, or delta list), and frees its table slot. |
 
 ## Interrupt Manager
 **Files:** `include/interrupt.h`, `src/interrupt/interrupt.c`, `src/interrupt/interruptdispatcher.s`, `include/hardwaredef.h`

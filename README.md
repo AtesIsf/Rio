@@ -118,7 +118,7 @@ flowchart TD
     TIMED -->|"interrupt_save, interrupt_restore"| INT
 
     %% Process & Memory Interactions
-    PROC -->|"get_stack, free_stack, get_heap, free_heap"| MEM
+    PROC -->|"kalloc, kfree"| MEM
     PROC -->|"scheduler_add, yield"| SCHED
 
     %% Synchronization (Semaphores)
