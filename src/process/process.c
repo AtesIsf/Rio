@@ -174,6 +174,8 @@ syscall kill(pid id) {
 
     free_stack(g_process_table[id].stack_base,
                 g_process_table[id].n_stack_pages);
+    free_heap(g_process_table[id].heap_start,
+                g_process_table[id].n_heap_pages);
 
     // TODO: update as more process states are defined
     switch (g_process_table[id].state) {
