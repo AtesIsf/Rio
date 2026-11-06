@@ -97,18 +97,17 @@ This section describes each subsystem shown in the architecture flowchart below,
 
 | Endpoint | Description |
 | :--- | :--- |
-| `byte *get_stack(void)` | Allocates a 4 KiB memory block for a process stack and returns the top address (grows downward). |
-| `status_code free_stack(byte *addr)` | Deallocates a process stack block, marking its state as free (`MEM_FREE`). |
-| `byte *get_heap(void)` | Allocates a 4 KiB memory block to serve as a kernel heap region (`MEM_HEAP`). |
-| `status_code free_heap(byte *addr)` | Deallocates a heap memory block, returning it to the pool of free blocks. |
-| `void *chef_malloc(byte *data, int32 size)` | Bump allocator allocating an 8-byte aligned chunk of `size` bytes within the given heap block. |
+| `syscall get_stack(byte *top, int32 n)` | Allocates `n` contiguous 4 KiB pages for a process stack. Returns `OK` or `ERR`. |
+| `syscall free_stack(byte *top, int32 n)` | Deallocates `n` contiguous 4 KiB stack pages starting at `top`. Returns `OK` or `ERR`. |
+| `syscall get_heap(byte *start, int32 n)` | Allocates `n` contiguous 4 KiB pages to serve as a heap region. Returns `OK` or `ERR`. |
+| `syscall free_heap(byte *start, int32 n)` | Deallocates `n` contiguous 4 KiB heap pages starting at `start`. Returns `OK` or `ERR`. |
 
 ### Process Manager
 **Files:** `include/process.h`, `src/process/process.c`, `src/process/firstrunwrapper.s`
 
 | Endpoint | Description |
 | :--- | :--- |
-| `syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...)` | Allocates a stack, configures initial register context and arguments, and sets up a new suspended process (`PROC_SUSP`). Returns PID or `ERR`. |
+| `syscall create(void *fn, int32 priority, uint32 n_stack_pages, uint32 n_heap_pages, const char *name, int32 n_args, ...)` | Allocates stack and heap pages, configures initial register context and arguments, and sets up a new suspended process (`PROC_SUSP`). Returns PID or `ERR`. |
 | `syscall resume(pid id)` | Transitions a process to `PROC_READY`, inserts it into the scheduler ready queue, and triggers preemption (`yield()`). |
 | `syscall kill(pid id)` | Terminates a process, deallocates its stack (`free_stack`), removes it from its active queue (ready queue, semaphore lobby, or delta list), and frees its table slot. |
 
@@ -198,7 +197,7 @@ flowchart TD
     TIMED -->|"interrupt_save, interrupt_restore"| INT
 
     %% Process & Memory Interactions
-    PROC -->|"get_stack, free_stack"| MEM
+    PROC -->|"get_stack, free_stack, get_heap, free_heap"| MEM
     PROC -->|"scheduler_add, yield"| SCHED
 
     %% Synchronization (Semaphores)
@@ -216,7 +215,6 @@ flowchart TD
 
     %% Task Execution & I/O
     TASKS -->|"create, resume, kill"| PROC
-    TASKS -->|"chef_malloc, get_heap, free_heap"| MEM
     TASKS -->|"kprintf, kputs, kprint"| CONSOLE
     CONSOLE -->|"kputc"| HW_UART
 ```
