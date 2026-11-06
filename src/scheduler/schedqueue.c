@@ -125,21 +125,3 @@ status_code sched_queue_remove(pid id) {
     return OK;
 }
 
-/**
- * Prints the current state of the ready queue, used for debugging
- * TODO: you may wanna remove this while PROD is defined or something
- */
-
-void sched_queue_debug() {
-    pid curr = SCHED_QUEUE_HEAD;
-
-    while (curr != SCHED_QUEUE_TAIL) {
-        kprintf("Pid: %d, priority %d, state: %d\n", curr,
-                g_process_table[curr].priority, g_process_table[curr].state);
-        curr = g_sched_queue[curr].next;
-    }
-    // print tail as well
-    kprintf("Pid: %d, priority %d, state: %d\n", curr,
-            g_process_table[curr].priority, g_process_table[curr].state);
-}
-

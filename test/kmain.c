@@ -14,11 +14,11 @@ extern process test_timed(void);
 extern process test_integration(void);
 
 static void run_suite(void *fn, const char *name) {
-    pid p = create(fn, 70, name, 0);
-    if (validpid(p)) {
-        resume(p);
+    process (*test_fn)(void) = (process (*)(void)) fn;
+    if (test_fn != NULL) {
+        test_fn();
     } else {
-        kprint("FAIL: could not spawn test process ");
+        kprint("FAIL: invalid test function for ");
         kputs(name);
     }
 }

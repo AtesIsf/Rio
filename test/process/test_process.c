@@ -9,16 +9,21 @@ process dummy_proc(void) {
 
 process test_process(void) {
     // 1. Parameter validation for create
-    if (create(NULL, 10, "test", 0) == ERR &&
-        create(dummy_proc, 0, "test", 0) == ERR &&
-        create(dummy_proc, -5, "test", 0) == ERR &&
-        create(dummy_proc, 10, "test", -1) == ERR) {
+    if (create(NULL, 10, 1, 1, "test", 0) == ERR &&
+        create(dummy_proc, 0, 1, 1, "test", 0) == ERR &&
+        create(dummy_proc, -5, 1, 1, "test", 0) == ERR &&
+        create(dummy_proc, 10, 1, 1, "test", -1) == ERR &&
+        create(dummy_proc, 10, 0, 1, "test", 0) == ERR &&
+        create(dummy_proc, 10, 1, 0, "test", 0) == ERR) {
         g_tests_passed++;
     }
 
     // 2. Process creation initial state
-    pid p = create(dummy_proc, 42, "proc_test", 0);
-    if (validpid(p) && g_process_table[p].state == PROC_SUSP && g_process_table[p].priority == 42) {
+    pid p = create(dummy_proc, 42, 1, 1, "proc_test", 0);
+    if (validpid(p) && g_process_table[p].state == PROC_SUSP &&
+        g_process_table[p].priority == 42 &&
+        g_process_table[p].n_stack_pages == 1 &&
+        g_process_table[p].n_heap_pages == 1) {
         g_tests_passed++;
     }
 

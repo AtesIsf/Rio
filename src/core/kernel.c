@@ -11,6 +11,7 @@
  */
 
 void __kentry(void) {
+    mem_init();
     process_table_init();
     lobby_init();
     semaphore_init();
@@ -20,7 +21,7 @@ void __kentry(void) {
     interrupts_init();
 
     // the main process will have priority 64
-    resume(create(kmain, 64, "kmain", 0));
+    resume(create(kmain, 64, 1, 1, "kmain", 0));
     yield();
 
     // this basically also becomes the NULL process

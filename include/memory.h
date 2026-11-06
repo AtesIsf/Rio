@@ -4,45 +4,50 @@
 #include <ktypes.h>
 #include <process.h>
 
-// Each memory block is 4KiB, including state and padding
-#define BLOCK_SIZE (4096 - 16)
-#define N_BLOCKS (N_PROCS * 2)
-
-#define MEM_FREE    (0)
-#define MEM_STACK   (1)
-#define MEM_HEAP    (2)
-
-struct MemBlock {
-    byte *curr_end;
-    byte state;
-    byte padding[7];
-    byte data[BLOCK_SIZE];
-};
-
-extern struct MemBlock g_memlist[N_BLOCKS];
-
-byte *get_stack();
-
-byte *get_heap();
-
-status_code free_stack(byte *addr);
-
-status_code free_heap(byte *addr);
-
 /**
- * These are heap manipulation functions. I call this the chef approach
- * because it conceptually looks like cutting onions.
+ * The memory model is loosely based on both Xinu and xv6.
  *
- * Advantages: simple, fast, and fits well with this memory system
+ * The main highlight of this memory manager is that the caller can
+ * specify number of requested pages (in 4KB).
  *
- * Disadvantage: no free, so could cause conceptual "fragmentation"
+ * Main Idea: Sacrifice the first page to store metadata.
+ * Place the page usage bitmap there. Calculate the number of pages required
+ * to store the said metadata. Remember to keep the data structure
+ * 16-byte aligned.
+ *
+ * The comment below is taken from xv6
+ *
+ * qemu -machine virt is set up like this,
+ * based on qemu's hw/riscv/virt.c:
+ *
+ * 00001000 -- boot ROM, provided by qemu
+ * 02000000 -- CLINT => Core Local Interrupt Controller
+ * 0C000000 -- PLIC => Platform Local Interrupt Controller
+ * 10000000 -- uart0
+ * 10001000 -- virtio disk
+ * 80000000 -- qemu's boot ROM loads the kernel here,
+ *             then jumps here.
+ * unused RAM after 80000000.
  */
 
-void *chef_malloc(byte *data, int32 size);
+// The kernel memory starts from here due to QEMU'S ROM
+#define KERNEL_BASE (0x80000000L)
 
-/**
- * Could be implemented later, but I don't think its necessary
- * status_code chef_free(void *ptr);
- */
+// QEMU defaults to 128 MB of RAM
+#define RAM_END (KERNEL_BASE + RAM_SIZE)
+
+/* helper macros */
+#define PAGE_ROUND_UP(x)  (((x) + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1))
+#define PAGE_ROUND_DOWN(x) (((x)) & ~(PAGE_SIZE - 1))
+
+/* functions */
+
+void mem_init();
+
+/* Memory Manager Endpoint Functions */
+
+syscall kalloc(byte **base, int32 n);
+
+syscall kfree(byte *base, int32 n);
 
 #endif

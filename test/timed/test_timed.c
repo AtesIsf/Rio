@@ -26,7 +26,7 @@ process test_timed(void) {
     }
 
     // 4. sleep_abort on non-sleeping process returns ERR
-    pid dummy = create(timed_dummy, 30, "tdummy", 0);
+    pid dummy = create(timed_dummy, 30, 1, 1, "tdummy", 0);
     if (sleep_abort(dummy) == ERR) {
         g_tests_passed++;
     }
@@ -42,7 +42,7 @@ process test_timed(void) {
     kill(dummy);
 
     // 6. Adversarial: unsleep() on non-sleeping process
-    pid not_sleeping = create(timed_dummy, 30, "t_awake", 0);
+    pid not_sleeping = create(timed_dummy, 30, 1, 1, "t_awake", 0);
     if (unsleep(not_sleeping) == OK) {
         kputs("  [DEFECT] unsleep() silently returns OK on non-sleeping process when lobby_remove fails");
         g_defects_found++;

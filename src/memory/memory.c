@@ -1,100 +1,137 @@
-/**
- * Functions to allocate the stack memory needed by low-level processes
- */
-
 #include <rio.h>
 
-struct MemBlock g_memlist[N_BLOCKS];
+// exported from the linker, first byte after the kernel, 16 byte aligned
+extern byte kernel_end;
+
+static uint64 n_pages; // number of pages in the RAM
+static byte *pages_start; // where the pages start from
+
+/* static inline bitmap helper functions */
+
+static inline void set_page_allocated(uint64 page_index) {
+    if (page_index >= n_pages) {
+        return;
+    }
+    pages_start[page_index / 8] |= (1U << (page_index % 8));
+}
+
+static inline void clear_page_allocated(uint64 page_index) {
+    if (page_index >= n_pages) {
+        return;
+    }
+    pages_start[page_index / 8] &= ~(1U << (page_index % 8));
+}
+
+static inline bool is_page_allocated(uint64 page_index) {
+    if (page_index >= n_pages) {
+        return true;
+    }
+    return (pages_start[page_index / 8] & (1U << (page_index % 8))) != 0;
+}
+
+/* exposed functions */
 
 /**
- * Returns the data associated with the first free entry from the end. Returns
- * NULL if no suitable chunk is found.
+ * Initializes the kernel memory subsystem and sets up the necessary
+ * metadata.
  */
 
-byte *get_stack() {
-    byte *target = NULL;
-    
-    for (int32 i = N_BLOCKS - 1; i >= 0; i--) {
-        if (g_memlist[i].state != MEM_FREE) {
-            continue;
-        }
-        target = (byte *) g_memlist[i].data;
-        target += BLOCK_SIZE; // we need to return the top, not base
-        g_memlist[i].state = MEM_STACK;
-        // this makes no sense for the stack but still
-        g_memlist[i].curr_end = g_memlist[i].data;
-        break;
+void mem_init() {
+    pages_start = (byte *) PAGE_ROUND_UP((uint64) &kernel_end);
+    n_pages = (RAM_END - (uint64) pages_start) / PAGE_SIZE;
+
+    // calculate #necessary bytes (round up n_pages)
+    uint64 bytes_required = ((n_pages + 7) & (~7)) / (sizeof(byte) * 8);
+
+    // calculate the necessary amount of metadata pages
+    uint64 pages_needed = PAGE_ROUND_UP(bytes_required) / PAGE_SIZE;
+
+    // zero out the metadata pages so all pages initially start as free (0)
+    for (uint64 i = 0; i < PAGE_ROUND_UP(bytes_required); i++) {
+        pages_start[i] = 0;
     }
-    return target;
+
+    // sets those # of metadata pages from the start to be allocated
+    for (uint64 i = 0; i < pages_needed; i++) {
+        set_page_allocated(i);
+    }
 }
 
 /**
- * Returns the data associated with the first free entry from the start.
- * Returns NULL if no suitable chunk is found. Should be freed by the
- * programmer afterwards!!!
+ * Finds and returns "n" contagious pages from the physical address space.
+ * Returns OK on success and ERR on error. Writes the start address of the
+ * found "n" pages into "base". Stack calculation is the caller's
+ * responsibility.
  */
 
-byte *get_heap() {
-    byte *target = NULL;
-    
-    for (int32 i = 0; i < N_BLOCKS; i++) {
-        if (g_memlist[i].state != MEM_FREE) {
-            continue;
-        }
-        target = (byte *) g_memlist[i].data;
-        g_memlist[i].state = MEM_HEAP;
-        g_memlist[i].curr_end = g_memlist[i].data;
-        break;
-    }
-    return target;
-}
+syscall kalloc(byte **base, int32 n) {
+    intmask mask = interrupt_save();
 
-/**
- * Frees the entry associated with the given data blob
- */
-
-status_code free_stack(byte *addr) {
-    if (addr == NULL) {
+    if (base == NULL || n <= 0) {
+        interrupt_restore(mask);
         return ERR;
     }
-    ((struct MemBlock *) (addr - BLOCK_SIZE - 16))->state = MEM_FREE;
+
+    int32 start_index = -1;
+    int32 len = 0;
+    for (uint64 i = 0; i < n_pages; i++) {
+        if (is_page_allocated(i) == true) {
+            start_index = -1;
+            len = 0;
+            continue;
+        }
+        // unallocated page
+        start_index = start_index == -1 ? (int32) i : start_index;
+        if (++len == n) {
+            break;
+        }
+    }
+
+    status_code result = OK;
+    if (start_index == -1) {
+        result = ERR;
+        *base = NULL;
+    } else {
+        result = OK;
+        *base = pages_start + PAGE_SIZE * start_index;
+        for (int32 i = start_index; i < start_index + n; i++) {
+            set_page_allocated(i);
+        }
+    }
+
+    interrupt_restore(mask);
+    return result;
+}
+
+/**
+ * Frees "n" physical pages starting from the given base pointer.
+ * Returns OK on success and ERR on error. If a wrong "n" is passed, the
+ * RAM will be corrupted!
+ */
+
+syscall kfree(byte *base, int32 n) {
+    intmask mask = interrupt_save();
+
+    if (base == NULL || n <= 0) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
+    // first, check the given pages are allocated => would prevent some issues
+    uint64 start_index = (base - pages_start) / PAGE_SIZE; 
+    for (uint64 i = start_index; i < start_index + n; i++) {
+        if (is_page_allocated(i) == false) {
+            interrupt_restore(mask);
+            return ERR;
+        }
+    }
+
+    // actual free
+    for (uint64 i = start_index; i < start_index + n; i++) {
+        clear_page_allocated(i);
+    }
+
+    interrupt_restore(mask);
     return OK;
-}
-
-/**
- * Exists for programmer convenience
- */
-status_code free_heap(byte *addr) {
-    if (addr == NULL) {
-        return ERR;
-    }
-    return free_stack(addr + BLOCK_SIZE);
-}
-
-/**
- * Given the data section pointer of a heap block obtained by the
- * low-level memory manager, allocates and returns a heap object of the
- * requested size. Returns NULL on failure.
- *
- * Causes undefined behaviour if the passed block is a stack block!
- */
-
-void *chef_malloc(byte *data, int32 size) {
-    if (data == NULL || size <= 0 
-        || ((struct MemBlock *) (data - 16))->state != MEM_HEAP) {
-        return NULL;
-    }
-
-    // round up to next multiple of 8
-    size = (size + 7) & (-8);
-    struct MemBlock *block = (struct MemBlock *) (data - 16);
-
-    byte *result = NULL;
-    if (block->curr_end + size <= &block->data[BLOCK_SIZE - 1]) {
-        result = block->curr_end;
-        block->curr_end += size;
-    }
-
-    return (void *) result;
 }
 
