@@ -31,7 +31,7 @@ typedef status_code syscall;
 // id = index
 struct ProcessTableEntry {
     struct Context ctx;
-    byte *stack_base;
+    byte *stack_base; // not the top of the stack!
     byte *heap_start;
     const char *name;
     int32 priority;

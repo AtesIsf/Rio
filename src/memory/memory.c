@@ -57,23 +57,26 @@ void mem_init() {
     }
 }
 
-syscall get_stack(byte *top, int32 n) {
-    panic("unimplemented get_stack");
+/**
+ * Finds and returns "n" contagious pages from the physical address space.
+ * Returns OK on success and ERR on error. Writes the start address of the
+ * found "n" pages into "base". Stack calculation is the caller's
+ * responsibility.
+ */
+
+syscall kalloc(byte *base, int32 n) {
+    panic("unimplemented kalloc");
     return ERR;
 }
 
-syscall get_heap(byte *top, int32 n) {
-    panic("unimplemented get_heap");
-    return ERR;
-}
+/**
+ * Frees "n" physical pages starting from the given base pointer.
+ * Returns OK on success and ERR on error. If a wrong "n" is passed, the
+ * RAM will be corrupted!
+ */
 
-syscall free_stack(byte *top, int32 n) {
-    panic("unimplemented free_stack");
-    return ERR;
-}
-
-syscall free_heap(byte *top, int32 n) {
-    panic("unimplemented free_heap");
+syscall kfree(byte *base, int32 n) {
+    panic("unimplemented kfree");
     return ERR;
 }
 

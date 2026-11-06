@@ -46,14 +46,8 @@ void mem_init();
 
 /* Memory Manager Endpoint Functions */
 
-syscall get_stack(byte *top, int32 n);
+syscall kalloc(byte *base, int32 n);
 
-syscall get_heap(byte *start, int32 n);
-
-/* can I implement these without n? */
-
-syscall free_stack(byte *top, int32 n);
-
-syscall free_heap(byte *start, int32 n);
+syscall kfree(byte *base, int32 n);
 
 #endif

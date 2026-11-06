@@ -42,17 +42,17 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
     }
 
     byte *stk = NULL;
-    status_code result = get_stack(stk, n_stack_pages);
+    status_code result = kalloc(stk, n_stack_pages);
     if (result == ERR) {
         interrupt_restore(mask);
         return ERR;
     }
-    // already 16-byte aligned
-    uint64 sp = (uint64) stk;
+    // already 16-byte aligned, move sp to top
+    uint64 sp = ((uint64) stk) + (n_stack_pages * PAGE_SIZE);
 
     // allocate proc heap space as well
     byte *hp = NULL;
-    result = get_heap(hp, n_heap_pages);
+    result = kalloc(hp, n_heap_pages);
     if (result == ERR) {
         interrupt_restore(mask);
         return ERR;
@@ -172,9 +172,9 @@ syscall kill(pid id) {
         return ERR;
     }
 
-    free_stack(g_process_table[id].stack_base,
+    kfree(g_process_table[id].stack_base,
                 g_process_table[id].n_stack_pages);
-    free_heap(g_process_table[id].heap_start,
+    kfree(g_process_table[id].heap_start,
                 g_process_table[id].n_heap_pages);
 
     // TODO: update as more process states are defined
