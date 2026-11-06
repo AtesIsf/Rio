@@ -44,7 +44,7 @@ syscall unsleep(pid id) {
     status_code result = lobby_remove(&g_delta, id);
     if (result == ERR) {
         interrupt_restore(mask);
-        return OK;
+        return ERR;
     }
 
     resume(id);

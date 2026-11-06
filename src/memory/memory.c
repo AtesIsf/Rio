@@ -90,10 +90,13 @@ syscall kalloc(byte **base, int32 n) {
     status_code result = OK;
     if (start_index == -1) {
         result = ERR;
-        base = NULL;
+        *base = NULL;
     } else {
         result = OK;
         *base = pages_start + PAGE_SIZE * start_index;
+        for (int32 i = start_index; i < start_index + n; i++) {
+            set_page_allocated(i);
+        }
     }
 
     interrupt_restore(mask);
@@ -129,6 +132,6 @@ syscall kfree(byte *base, int32 n) {
     }
 
     interrupt_restore(mask);
-    return ERR;
+    return OK;
 }
 

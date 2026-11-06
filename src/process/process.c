@@ -140,7 +140,7 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
 syscall resume(pid id) {
     intmask mask = interrupt_save();
 
-    if (!validpid(id)) {
+    if (!validpid(id) || g_process_table[id].state != PROC_SUSP) {
         interrupt_restore(mask);
         return ERR;
     }
@@ -167,7 +167,8 @@ syscall resume(pid id) {
 syscall kill(pid id) {
     intmask mask = interrupt_save();
 
-    if (!validpid(id) || id == 0) { // can't be the NULL proc, so id != 0
+    // can't be the NULL proc, so id != 0
+    if (!validpid(id) || id == 0 || g_process_table[id].state == PROC_EMPTY) {
         interrupt_restore(mask);
         return ERR;
     }

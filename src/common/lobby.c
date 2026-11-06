@@ -44,7 +44,16 @@ status_code lobby_enqueue(struct LobbyEntry *head, pid id, int32 delta) {
         return ERR;
     }
 
+    // check if it already exists
     pid curr = head->next;
+    while (curr != LOBBY_NULL) {
+        if (curr == id) {
+            return ERR;
+        }
+        curr = lobby[curr].next;
+    }
+
+    curr = head->next;
     pid prev = LOBBY_NULL;
     // TODO: may want to optimize this later, O(n) semaphore insertion
     while (curr != LOBBY_NULL) {
