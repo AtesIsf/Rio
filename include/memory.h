@@ -46,7 +46,7 @@ void mem_init();
 
 /* Memory Manager Endpoint Functions */
 
-syscall kalloc(byte *base, int32 n);
+syscall kalloc(byte **base, int32 n);
 
 syscall kfree(byte *base, int32 n);
 

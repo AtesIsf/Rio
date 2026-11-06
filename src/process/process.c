@@ -43,14 +43,14 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
 
     // allocate proc heap space first to ensure kmain isn't screwed
     byte *hp = NULL;
-    status_code result = kalloc(hp, n_heap_pages);
+    status_code result = kalloc(&hp, n_heap_pages);
     if (result == ERR) {
         interrupt_restore(mask);
         return ERR;
     }
 
     byte *stk = NULL;
-    result = kalloc(stk, n_stack_pages);
+    result = kalloc(&stk, n_stack_pages);
     if (result == ERR) {
         interrupt_restore(mask);
         return ERR;

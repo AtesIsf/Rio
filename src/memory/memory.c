@@ -64,9 +64,40 @@ void mem_init() {
  * responsibility.
  */
 
-syscall kalloc(byte *base, int32 n) {
-    panic("unimplemented kalloc");
-    return ERR;
+syscall kalloc(byte **base, int32 n) {
+    intmask mask = interrupt_save();
+
+    if (base == NULL || n <= 0) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
+    int32 start_index = -1;
+    int32 len = 0;
+    for (uint64 i = 0; i < n_pages; i++) {
+        if (is_page_allocated(i) == true) {
+            start_index = -1;
+            len = 0;
+            continue;
+        }
+        // unallocated page
+        start_index = start_index == -1 ? (int32) i : start_index;
+        if (++len == n) {
+            break;
+        }
+    }
+
+    status_code result = OK;
+    if (start_index == -1) {
+        result = ERR;
+        base = NULL;
+    } else {
+        result = OK;
+        *base = pages_start + PAGE_SIZE * start_index;
+    }
+
+    interrupt_restore(mask);
+    return result;
 }
 
 /**
@@ -76,7 +107,16 @@ syscall kalloc(byte *base, int32 n) {
  */
 
 syscall kfree(byte *base, int32 n) {
+    intmask mask = interrupt_save();
+
+    if (base == NULL || n <= 0) {
+        interrupt_restore(mask);
+        return ERR;
+    }
+
     panic("unimplemented kfree");
+
+    interrupt_restore(mask);
     return ERR;
 }
 
