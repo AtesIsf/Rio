@@ -16,9 +16,9 @@ process test_scheduler(void) {
     }
 
     // 2. Priority queue ordering (use priorities > 64 to avoid dequeuing kmain)
-    pid p1 = create(sched_dummy, 80, "p1", 0);
-    pid p2 = create(sched_dummy, 100, "p2", 0);
-    pid p3 = create(sched_dummy, 90, "p3", 0);
+    pid p1 = create(sched_dummy, 80, 1, 1, "p1", 0);
+    pid p2 = create(sched_dummy, 100, 1, 1, "p2", 0);
+    pid p3 = create(sched_dummy, 90, 1, 1, "p3", 0);
 
     sched_queue_enqueue(p1, 80);
     sched_queue_enqueue(p2, 100);
@@ -45,8 +45,8 @@ process test_scheduler(void) {
     kill(p3);
 
     // 3. FIFO ordering for equal priority
-    pid a = create(sched_dummy, 85, "a", 0);
-    pid b = create(sched_dummy, 85, "b", 0);
+    pid a = create(sched_dummy, 85, 1, 1, "a", 0);
+    pid b = create(sched_dummy, 85, 1, 1, "b", 0);
 
     sched_queue_enqueue(a, 85);
     sched_queue_enqueue(b, 85);
@@ -64,7 +64,7 @@ process test_scheduler(void) {
     kill(b);
 
     // 4. Removal
-    pid rem = create(sched_dummy, 75, "rem", 0);
+    pid rem = create(sched_dummy, 75, 1, 1, "rem", 0);
     sched_queue_enqueue(rem, 75);
     if (sched_queue_remove(rem) == OK && !sched_queue_includes(rem) && sched_queue_remove(rem) == ERR) {
         g_tests_passed++;
