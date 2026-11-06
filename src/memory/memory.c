@@ -114,7 +114,19 @@ syscall kfree(byte *base, int32 n) {
         return ERR;
     }
 
-    panic("unimplemented kfree");
+    // first, check the given pages are allocated => would prevent some issues
+    uint64 start_index = (base - pages_start) / PAGE_SIZE; 
+    for (uint64 i = start_index; i < start_index + n; i++) {
+        if (is_page_allocated(i) == false) {
+            interrupt_restore(mask);
+            return ERR;
+        }
+    }
+
+    // actual free
+    for (uint64 i = start_index; i < start_index + n; i++) {
+        clear_page_allocated(i);
+    }
 
     interrupt_restore(mask);
     return ERR;
