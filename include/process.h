@@ -16,6 +16,8 @@ extern pid curr_pid;
 typedef status_code process;
 typedef status_code syscall;
 
+#define PROC_NOSEM (-1) // for empty sem_id in the process table
+
 // process states
 #define PROC_CURR   (0) // current running proc
 #define PROC_READY  (1) // in ready list
@@ -32,6 +34,7 @@ struct ProcessTableEntry {
     byte *stack_base;
     const char *name;
     int32 priority;
+    int32 n_stack_pages;
     sem sem_id;
     byte state;
 };
@@ -42,7 +45,8 @@ extern struct ProcessTableEntry g_process_table[N_PROCS];
 
 void process_table_init();
 
-syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...);
+syscall create(void *fn, int32 priority, uint32 n_stack_pages,
+                const char *name, int32 n_args, ...);
 
 syscall resume(pid id);
 

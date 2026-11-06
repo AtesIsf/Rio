@@ -4,45 +4,25 @@
 #include <ktypes.h>
 #include <process.h>
 
-// Each memory block is 4KiB, including state and padding
-#define BLOCK_SIZE (4096 - 16)
-#define N_BLOCKS (N_PROCS * 2)
-
-#define MEM_FREE    (0)
-#define MEM_STACK   (1)
-#define MEM_HEAP    (2)
-
-struct MemBlock {
-    byte *curr_end;
-    byte state;
-    byte padding[7];
-    byte data[BLOCK_SIZE];
-};
-
-extern struct MemBlock g_memlist[N_BLOCKS];
-
-byte *get_stack();
-
-byte *get_heap();
-
-status_code free_stack(byte *addr);
-
-status_code free_heap(byte *addr);
+#define MAX_STACK_PAGES (16) // TODO: change this later
 
 /**
- * These are heap manipulation functions. I call this the chef approach
- * because it conceptually looks like cutting onions.
+ * Maybe make a big array of pages, then abstractly split them into 2 using
+ * 2 pointers?
  *
- * Advantages: simple, fast, and fits well with this memory system
+ * Maybe huge array with a helper bitmap?
  *
- * Disadvantage: no free, so could cause conceptual "fragmentation"
+ * Could I do a heap-allocator-like freelist-based system?
  */
 
-void *chef_malloc(byte *data, int32 size);
+syscall get_stack(byte *top, int32 n);
 
-/**
- * Could be implemented later, but I don't think its necessary
- * status_code chef_free(void *ptr);
- */
+syscall get_heap(byte *start, int32 n);
+
+/* can I implement these without n? */
+
+syscall free_stack(byte *top, int32 n);
+
+syscall free_heap(byte *start, int32 n);
 
 #endif

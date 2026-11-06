@@ -8,8 +8,13 @@ struct ProcessTableEntry g_process_table[N_PROCS];
 
 void process_table_init() {
     for (int32 i = 1; i < N_PROCS; i++) {
-        g_process_table[i].state = PROC_EMPTY;
+        g_process_table[i].ctx = (struct Context) { 0 };
+        g_process_table[i].stack_base = NULL;
         g_process_table[i].name = "";
+        g_process_table[i].priority = 0;
+        g_process_table[i].n_stack_pages = 0;
+        g_process_table[i].sem_id = PROC_NOSEM;
+        g_process_table[i].state = PROC_EMPTY;
     }
 }
 
@@ -18,10 +23,12 @@ void process_table_init() {
  * Returns ERR if an error is encountered.
  */
 
-syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
+syscall create(void *fn, int32 priority, uint32 n_stack_pages,
+                const char *name, int32 n_args, ...) {
     intmask mask = interrupt_save();
 
-    if (fn == NULL || priority < 1 || n_args < 0) {
+    if (fn == NULL || n_stack_pages >= MAX_STACK_PAGES || priority < 1 
+                    || n_args < 0) {
         interrupt_restore(mask);
         return ERR;
     }
@@ -33,8 +40,9 @@ syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
         return ERR;
     }
 
-    byte *stk = get_stack();
-    if (stk == NULL) {
+    byte *stk = NULL;
+    status_code result = get_stack(stk, n_stack_pages);
+    if (result == ERR) {
         interrupt_restore(mask);
         return ERR;
     }
@@ -107,7 +115,6 @@ syscall create(void *fn, int32 priority, const char *name, int32 n_args, ...) {
     g_process_table[id].name = name;
     g_process_table[id].priority = priority;
     g_process_table[id].state = PROC_SUSP;
-    g_process_table[id].sem_id = -1;
 
     interrupt_restore(mask);
     return id;
@@ -153,7 +160,8 @@ syscall kill(pid id) {
         return ERR;
     }
 
-    free_stack(g_process_table[id].stack_base);
+    free_stack(g_process_table[id].stack_base,
+                g_process_table[id].n_stack_pages);
 
     // TODO: update as more process states are defined
     switch (g_process_table[id].state) {
@@ -169,7 +177,7 @@ syscall kill(pid id) {
 
         case PROC_WAIT:
             sem_abort(g_process_table[id].sem_id, id);
-            g_process_table[id].sem_id = -1;
+            g_process_table[id].sem_id = PROC_NOSEM;
             g_process_table[id].state = PROC_EMPTY;
             break;
 
