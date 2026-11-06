@@ -32,9 +32,11 @@ typedef status_code syscall;
 struct ProcessTableEntry {
     struct Context ctx;
     byte *stack_base;
+    byte *heap_start;
     const char *name;
     int32 priority;
     int32 n_stack_pages;
+    int32 n_heap_pages;
     sem sem_id;
     byte state;
 };
@@ -46,7 +48,7 @@ extern struct ProcessTableEntry g_process_table[N_PROCS];
 void process_table_init();
 
 syscall create(void *fn, int32 priority, uint32 n_stack_pages,
-                const char *name, int32 n_args, ...);
+                uint32 n_heap_pages, const char *name, int32 n_args, ...);
 
 syscall resume(pid id);
 

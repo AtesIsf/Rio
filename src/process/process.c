@@ -10,9 +10,11 @@ void process_table_init() {
     for (int32 i = 1; i < N_PROCS; i++) {
         g_process_table[i].ctx = (struct Context) { 0 };
         g_process_table[i].stack_base = NULL;
+        g_process_table[i].heap_start = NULL;
         g_process_table[i].name = "";
         g_process_table[i].priority = 0;
         g_process_table[i].n_stack_pages = 0;
+        g_process_table[i].n_heap_pages = 0;
         g_process_table[i].sem_id = PROC_NOSEM;
         g_process_table[i].state = PROC_EMPTY;
     }
@@ -24,11 +26,10 @@ void process_table_init() {
  */
 
 syscall create(void *fn, int32 priority, uint32 n_stack_pages,
-                const char *name, int32 n_args, ...) {
+                uint32 n_heap_pages, const char *name, int32 n_args, ...) {
     intmask mask = interrupt_save();
 
-    if (fn == NULL || n_stack_pages >= MAX_STACK_PAGES || priority < 1 
-                    || n_args < 0) {
+    if (fn == NULL || priority < 1 || n_args < 0) {
         interrupt_restore(mask);
         return ERR;
     }
@@ -48,6 +49,14 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
     }
     // already 16-byte aligned
     uint64 sp = (uint64) stk;
+
+    // allocate proc heap space as well
+    byte *hp = NULL;
+    result = get_heap(hp, n_heap_pages);
+    if (result == ERR) {
+        interrupt_restore(mask);
+        return ERR;
+    }
 
     // if n_args > 8, then the rest are placed on the stack in risc-v
     // must be in 16-byte aligned chunks.
@@ -112,6 +121,9 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
     va_end(ap);
 
     g_process_table[id].stack_base = stk;
+    g_process_table[id].n_stack_pages = n_stack_pages;
+    g_process_table[id].heap_start = hp;
+    g_process_table[id].n_heap_pages = n_heap_pages;
     g_process_table[id].name = name;
     g_process_table[id].priority = priority;
     g_process_table[id].state = PROC_SUSP;

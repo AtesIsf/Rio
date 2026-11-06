@@ -26,5 +26,6 @@ SECTIONS {
 	.data : ALIGN(4K) {
 		*(.data);
 	}
+    PROVIDE(kernel_end = .);
 }
 
