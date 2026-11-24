@@ -4,11 +4,11 @@ An operating system for the RISC-V architecture, written in C23.
 
 Using the following textbooks as guides: 
 
-* "Operating System Design: The Xinu Approach" by Douglar Comer, my
+* "Operating System Design: The Xinu Approach" by Douglas Comer, my
 professor for CS354: Operating Systems at Purdue University.
 
 * "xv6: a simple, Unix-like teaching operating system" by Russ Cox, Frans
-Kaashoek, and Rober Morris.
+Kaashoek, and Robert Morris.
 
 ## Table of Contents
 
