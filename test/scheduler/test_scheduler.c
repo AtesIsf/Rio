@@ -1,76 +1,93 @@
-#include <rio.h>
+#include "check.h"
 
-extern int32 g_tests_passed;
-extern int32 g_defects_found;
+static volatile int32 g_log[8];
+static volatile int32 g_nlog;
 
-process sched_dummy(void) {
+static process noop(void) {
     return OK;
 }
 
-process test_scheduler(void) {
-    pid out = 0;
+static void log_tag(int32 tag) {
+    g_log[g_nlog++] = tag;
+}
 
-    // 1. Queue membership bounds checking
-    if (!sched_queue_includes(-1) && !sched_queue_includes(N_PROCS) && sched_queue_includes(0)) {
-        g_tests_passed++;
-    }
-
-    // 2. Priority queue ordering (use priorities > 64 to avoid dequeuing kmain)
-    pid p1 = create(sched_dummy, 80, 1, 1, "p1", 0);
-    pid p2 = create(sched_dummy, 100, 1, 1, "p2", 0);
-    pid p3 = create(sched_dummy, 90, 1, 1, "p3", 0);
-
-    sched_queue_enqueue(p1, 80);
-    sched_queue_enqueue(p2, 100);
-    sched_queue_enqueue(p3, 90);
-
-    // Duplicate enqueue rejection
-    if (sched_queue_enqueue(p1, 80) == ERR) {
-        g_tests_passed++;
-    }
-
-    sched_queue_dequeue(&out);
-    pid first = out;
-    sched_queue_dequeue(&out);
-    pid second = out;
-    sched_queue_dequeue(&out);
-    pid third = out;
-
-    if (first == p2 && second == p3 && third == p1) {
-        g_tests_passed++;
-    }
-
-    kill(p1);
-    kill(p2);
-    kill(p3);
-
-    // 3. FIFO ordering for equal priority
-    pid a = create(sched_dummy, 85, 1, 1, "a", 0);
-    pid b = create(sched_dummy, 85, 1, 1, "b", 0);
-
-    sched_queue_enqueue(a, 85);
-    sched_queue_enqueue(b, 85);
-
-    sched_queue_dequeue(&out);
-    pid pop_a = out;
-    sched_queue_dequeue(&out);
-    pid pop_b = out;
-
-    if (pop_a == a && pop_b == b) {
-        g_tests_passed++;
-    }
-
-    kill(a);
-    kill(b);
-
-    // 4. Removal
-    pid rem = create(sched_dummy, 75, 1, 1, "rem", 0);
-    sched_queue_enqueue(rem, 75);
-    if (sched_queue_remove(rem) == OK && !sched_queue_includes(rem) && sched_queue_remove(rem) == ERR) {
-        g_tests_passed++;
-    }
-    kill(rem);
-
-    kputs("  [PASS] test_scheduler");
+static process logger(uint64 tag) {
+    log_tag((int32) tag);
     return OK;
+}
+
+// logs, yields and logs again with interrupts off so only yield switches
+static process rr(uint64 tag) {
+    intmask mask = interrupt_save();
+    log_tag((int32) tag);
+    yield();
+    log_tag((int32) tag);
+    interrupt_restore(mask);
+    return OK;
+}
+
+static process starter(uint64 a, uint64 b, uint64 c) {
+    resume((pid) a);
+    resume((pid) b);
+    if (c != 0) {
+        resume((pid) c);
+    }
+    return OK;
+}
+
+static void bad_pid(void) {
+    bool ok = scheduler_add(-1) == ERR;
+    ok &= scheduler_add(N_PROCS) == ERR;
+    ok &= scheduler_remove(-1) == ERR;
+    ok &= scheduler_remove(N_PROCS) == ERR;
+    CHECK("sched_rejects_bad_pid", ok);
+}
+
+static void dup_add_absent_remove(void) {
+    pid q = create(noop, 10, 1, 1, "q", 0);
+
+    status_code a1 = scheduler_add(q);
+    status_code a2 = scheduler_add(q);
+    status_code r1 = scheduler_remove(q);
+    status_code r2 = scheduler_remove(q);
+    kill(q);
+
+    CHECK("sched_dup_add_absent_remove",
+          a1 == OK && a2 == ERR && r1 == OK && r2 == ERR);
+}
+
+static void highest_priority_first(void) {
+    g_nlog = 0;
+    pid lo = create(logger, 80, 1, 1, "lo", 1, (uint64) 80);
+    pid hi = create(logger, 100, 1, 1, "hi", 1, (uint64) 100);
+    pid mid = create(logger, 90, 1, 1, "mid", 1, (uint64) 90);
+    pid s = create(starter, 200, 1, 1, "start", 3,
+                   (uint64) lo, (uint64) hi, (uint64) mid);
+
+    resume(s);
+
+    CHECK("sched_highest_priority_first",
+          g_nlog == 3 && g_log[0] == 100 && g_log[1] == 90 &&
+          g_log[2] == 80);
+}
+
+static void round_robin(void) {
+    g_nlog = 0;
+    pid a = create(rr, 85, 1, 1, "rrA", 1, (uint64) 'A');
+    pid b = create(rr, 85, 1, 1, "rrB", 1, (uint64) 'B');
+    pid s = create(starter, 200, 1, 1, "start", 3,
+                   (uint64) a, (uint64) b, (uint64) 0);
+
+    resume(s);
+
+    CHECK("sched_round_robin_equal_prio",
+          g_nlog == 4 && g_log[0] == 'A' && g_log[1] == 'B' &&
+          g_log[2] == 'A' && g_log[3] == 'B');
+}
+
+void test_scheduler(void) {
+    bad_pid();
+    dup_add_absent_remove();
+    highest_priority_first();
+    round_robin();
 }

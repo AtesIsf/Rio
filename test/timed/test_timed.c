@@ -1,56 +1,102 @@
-#include <rio.h>
+#include "check.h"
 
-extern int32 g_tests_passed;
-extern int32 g_defects_found;
+static volatile int32 g_step;
 
-process timed_dummy(void) {
+static process sleeper(uint64 ms) {
+    g_step = 1;
+    sleep(ms);
+    g_step = 2;
     return OK;
 }
 
-process test_timed(void) {
-    // 1. Empty delta queue tick returns ERR
-    delta_init();
-    if (delta_tick() == ERR) {
-        g_tests_passed++;
-    }
-
-    // 2. sleep(0) fast path
-    if (sleep(0) == OK) {
-        g_tests_passed++;
-    }
-
-    // 3. sleep_abort and unsleep boundary checks
-    if (sleep_abort(-1) == ERR && sleep_abort(N_PROCS) == ERR &&
-        unsleep(-1) == ERR && unsleep(N_PROCS) == ERR) {
-        g_tests_passed++;
-    }
-
-    // 4. sleep_abort on non-sleeping process returns ERR
-    pid dummy = create(timed_dummy, 30, 1, 1, "tdummy", 0);
-    if (sleep_abort(dummy) == ERR) {
-        g_tests_passed++;
-    }
-
-    // 5. Delta tick wakes sleeping process to PROC_READY
-    delta_init();
-    g_process_table[dummy].state = PROC_SLEEP;
-    lobby_enqueue(&g_delta, dummy, 1);
-
-    if (delta_tick() == OK && g_process_table[dummy].state == PROC_READY) {
-        g_tests_passed++;
-    }
-    kill(dummy);
-
-    // 6. Adversarial: unsleep() on non-sleeping process
-    pid not_sleeping = create(timed_dummy, 30, 1, 1, "t_awake", 0);
-    if (unsleep(not_sleeping) == OK) {
-        kputs("  [DEFECT] unsleep() silently returns OK on non-sleeping process when lobby_remove fails");
-        g_defects_found++;
-    } else {
-        g_tests_passed++;
-    }
-    kill(not_sleeping);
-
-    kputs("  [PASS] test_timed");
+static process noop(void) {
     return OK;
+}
+
+static bool is_empty(pid p) {
+    return g_process_table[p].state == PROC_EMPTY;
+}
+
+// Starts a priority-100 child that runs until it sleeps.
+static pid start_sleeper(uint64 ms) {
+    g_step = 0;
+    pid p = create(sleeper, 100, 1, 1, "sleeper", 1, ms);
+    resume(p);
+    return p;
+}
+
+static void sleep_zero(void) {
+    CHECK("sleep_zero_ok", sleep(0) == OK);
+}
+
+static void bad_pid(void) {
+    bool ok = sleep_abort(-1) == ERR;
+    ok &= sleep_abort(N_PROCS) == ERR;
+    ok &= unsleep(-1) == ERR;
+    ok &= unsleep(N_PROCS) == ERR;
+    CHECK("sleep_fns_reject_bad_pid", ok);
+}
+
+static void awake_pid(void) {
+    pid q = create(noop, 10, 1, 1, "q", 0);
+    bool ok = sleep_abort(q) == ERR;
+    ok &= unsleep(q) == ERR;
+    kill(q);
+    CHECK("sleep_fns_reject_awake", ok);
+}
+
+static void block_then_kill(void) {
+    pid p = start_sleeper(100000);
+    bool blocked = g_step == 1 && g_process_table[p].state == PROC_SLEEP;
+    CHECK("sleep_blocks_caller", blocked);
+
+    status_code k = kill(p);
+    bool empty = is_empty(p);
+    status_code again = sleep_abort(p);
+    CHECK("kill_sleeping_leaves_delta",
+          k == OK && empty && again == ERR);
+}
+
+static void large_ms(void) {
+    pid p = start_sleeper(1ULL << 31);
+    bool blocked = g_step == 1 && g_process_table[p].state == PROC_SLEEP;
+    if (!is_empty(p)) {
+        kill(p);
+    }
+    CHECK("sleep_large_ms_not_truncated", blocked);
+}
+
+static void unsleep_wakes(void) {
+    pid p = start_sleeper(100000);
+
+    status_code u = unsleep(p);
+    yield();
+    bool woke = g_step == 2 && is_empty(p);
+    if (!is_empty(p)) {
+        kill(p);
+    }
+    CHECK("unsleep_wakes_sleeper", u == OK && woke);
+}
+
+static void wakes_after_ms(void) {
+    pid p = start_sleeper(5);
+
+    uint64 t0 = read_time();
+    while (read_time() - t0 < 50 * TICK_MS);
+    yield();
+    bool woke = g_step == 2 && is_empty(p);
+    if (!is_empty(p)) {
+        kill(p);
+    }
+    CHECK("sleep_wakes_after_ms", woke);
+}
+
+void test_timed(void) {
+    sleep_zero();
+    bad_pid();
+    awake_pid();
+    block_then_kill();
+    large_ms();
+    unsleep_wakes();
+    wakes_after_ms();
 }

@@ -1,41 +1,61 @@
-#include <rio.h>
+#include "check.h"
 
-extern int32 g_tests_passed;
-extern int32 g_defects_found;
+static bool sie(void) {
+    return (read_sstatus() & SSTATUS_SIE) != 0;
+}
 
-process test_interrupt(void) {
-    // 1. Single interrupt save disables SIE
-    intmask m1 = interrupt_save();
-    if ((read_sstatus() & SSTATUS_SIE) == 0) {
-        g_tests_passed++;
-    } else {
-        kputs("FAIL: interrupt_save did not clear SIE bit");
-    }
+static void nesting(void) {
+    intmask outer = interrupt_save();
+    bool off1 = !sie();
+    intmask inner = interrupt_save();
+    bool off2 = !sie();
+    interrupt_restore(inner);
+    bool off3 = !sie();
+    interrupt_restore(outer);
+    bool on = sie();
 
-    // 2. Nested interrupt save keeps SIE disabled
-    intmask m2 = interrupt_save();
-    if ((read_sstatus() & SSTATUS_SIE) == 0) {
-        g_tests_passed++;
-    } else {
-        kputs("FAIL: nested interrupt_save enabled SIE bit");
-    }
+    CHECK("sie_save_restore_nesting", off1 && off2 && off3 && on);
+}
 
-    // 3. Inner restore maintains disabled state
-    interrupt_restore(m2);
-    if ((read_sstatus() & SSTATUS_SIE) == 0) {
-        g_tests_passed++;
-    } else {
-        kputs("FAIL: inner restore prematurely re-enabled interrupts");
-    }
+// Every early-return path must give back the SIE state it found.
+static bool errors_keep(bool want) {
+    sem s = -1;
+    bool ok = true;
 
-    // 4. Outer restore re-enables interrupts
-    interrupt_restore(m1);
-    if ((read_sstatus() & SSTATUS_SIE) != 0) {
-        g_tests_passed++;
-    } else {
-        kputs("FAIL: outer restore failed to re-enable interrupts");
-    }
+#define STEP(call) do { ok &= ((call) == ERR) && (sie() == want); } while (0)
+    STEP(kalloc(NULL, 1));
+    STEP(kfree(NULL, 1));
+    STEP(create(NULL, 10, 1, 1, "x", 0));
+    STEP(resume(-1));
+    STEP(kill(-1));
+    STEP(scheduler_add(-1));
+    STEP(scheduler_remove(-1));
+    STEP(sem_create(-1, &s));
+    STEP(sem_wait(-1));
+    STEP(sem_release(-1));
+    STEP(sem_free(-1));
+    STEP(sem_abort(-1, 0));
+    STEP(sleep_abort(-1));
+    STEP(unsleep(-1));
+#undef STEP
+    return ok;
+}
 
-    kputs("  [PASS] test_interrupt");
-    return OK;
+static void errors_with_sie_on(void) {
+    bool start_on = sie();
+    bool ok = errors_keep(true);
+    CHECK("syscall_errors_keep_sie_on", start_on && ok);
+}
+
+static void errors_with_sie_off(void) {
+    intmask mask = interrupt_save();
+    bool ok = errors_keep(false);
+    interrupt_restore(mask);
+    CHECK("syscall_errors_keep_sie_off", ok);
+}
+
+void test_interrupt(void) {
+    nesting();
+    errors_with_sie_on();
+    errors_with_sie_off();
 }
