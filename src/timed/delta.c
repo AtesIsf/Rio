@@ -14,7 +14,7 @@ void delta_init() {
 
 status_code delta_tick() {
     pid proc = 0;
-    int32 delta = 0;
+    uint64 delta = 0;
 
     status_code result = lobby_peek(&g_delta, &proc, &delta);
     if (result == ERR) {

@@ -52,6 +52,7 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
     byte *stk = NULL;
     result = kalloc(&stk, n_stack_pages);
     if (result == ERR) {
+        kfree(hp, n_heap_pages);
         interrupt_restore(mask);
         return ERR;
     }
@@ -140,7 +141,9 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
 syscall resume(pid id) {
     intmask mask = interrupt_save();
 
-    if (!validpid(id) || g_process_table[id].state != PROC_SUSP) {
+    if (!validpid(id) || g_process_table[id].state == PROC_CURR
+        || g_process_table[id].state == PROC_EMPTY
+        || g_process_table[id].state == PROC_READY) {
         interrupt_restore(mask);
         return ERR;
     }
@@ -173,6 +176,9 @@ syscall kill(pid id) {
         return ERR;
     }
 
+    // Potential danger? Stack freed while the current proc is still active
+    // It works right now because the stack (or heap) isn't realloced
+    // until a switch occurs
     kfree(g_process_table[id].stack_base,
                 g_process_table[id].n_stack_pages);
     kfree(g_process_table[id].heap_start,

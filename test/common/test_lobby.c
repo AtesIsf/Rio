@@ -12,12 +12,11 @@ static void drain(struct LobbyEntry *h) {
 static void bad_args(void) {
     struct LobbyEntry h = { LOBBY_NULL, 0 };
     pid id = 0;
-    int32 d = 0;
+    uint64 d = 0;
 
     bool ok = lobby_enqueue(NULL, A, 0) == ERR;
     ok &= lobby_enqueue(&h, -1, 0) == ERR;
     ok &= lobby_enqueue(&h, N_PROCS, 0) == ERR;
-    ok &= lobby_enqueue(&h, A, -1) == ERR;
     ok &= lobby_dequeue(NULL, &id) == ERR;
     ok &= lobby_dequeue(&h, NULL) == ERR;
     ok &= lobby_dequeue(&h, &id) == ERR;
@@ -47,7 +46,7 @@ static void fifo(void) {
 static void delta_relative(void) {
     struct LobbyEntry h = { LOBBY_NULL, 0 };
     pid id = -1;
-    int32 d = -1;
+    uint64 d = UINT64_MAX;
 
     lobby_enqueue(&h, A, 10);
     lobby_enqueue(&h, B, 5);

@@ -6,6 +6,9 @@ extern byte kernel_end;
 static uint64 n_pages; // number of pages in the RAM
 static byte *pages_start; // where the pages start from
 
+// the first page after all the metadata pages end
+static byte *usable_pages_start;
+
 /* static inline bitmap helper functions */
 
 static inline void set_page_allocated(uint64 page_index) {
@@ -55,6 +58,8 @@ void mem_init() {
     for (uint64 i = 0; i < pages_needed; i++) {
         set_page_allocated(i);
     }
+
+    usable_pages_start = &pages_start[bytes_required];
 }
 
 /**
@@ -88,7 +93,7 @@ syscall kalloc(byte **base, int32 n) {
     }
 
     status_code result = OK;
-    if (start_index == -1) {
+    if (len != n) {
         result = ERR;
         *base = NULL;
     } else {
@@ -112,7 +117,8 @@ syscall kalloc(byte **base, int32 n) {
 syscall kfree(byte *base, int32 n) {
     intmask mask = interrupt_save();
 
-    if (base == NULL || n <= 0) {
+    if (base == NULL || n <= 0 || base < usable_pages_start
+        || base > (byte *) RAM_END - n * PAGE_SIZE) {
         interrupt_restore(mask);
         return ERR;
     }

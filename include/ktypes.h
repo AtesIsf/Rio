@@ -42,8 +42,8 @@ typedef uint64 irq;
 #define UINT64_MAX (__UINT64_MAX__)
 
 // process exit codes constants
-typedef byte status_code;
+typedef int8 status_code;
 #define OK (0)
-#define ERR (1)
+#define ERR (-1)
 
 #endif

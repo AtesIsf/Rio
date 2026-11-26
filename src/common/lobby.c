@@ -39,8 +39,8 @@ status_code lobby_dequeue(struct LobbyEntry *head, pid *id) {
  * delta = 0 for order preservation!
  */
 
-status_code lobby_enqueue(struct LobbyEntry *head, pid id, int32 delta) {
-    if (head == NULL || !validpid(id) || delta < 0) {
+status_code lobby_enqueue(struct LobbyEntry *head, pid id, uint64 delta) {
+    if (head == NULL || !validpid(id)) {
         return ERR;
     }
 
@@ -57,7 +57,7 @@ status_code lobby_enqueue(struct LobbyEntry *head, pid id, int32 delta) {
     pid prev = LOBBY_NULL;
     // TODO: may want to optimize this later, O(n) semaphore insertion
     while (curr != LOBBY_NULL) {
-        if (delta - lobby[curr].delta >= 0) {
+        if (delta >= lobby[curr].delta) {
             delta -= lobby[curr].delta;
         } else {
             break;
@@ -91,7 +91,7 @@ status_code lobby_enqueue(struct LobbyEntry *head, pid id, int32 delta) {
  * with interrupts disabled.
  */
 
-status_code lobby_peek(struct LobbyEntry *head, pid *id, int32 *delta) {
+status_code lobby_peek(struct LobbyEntry *head, pid *id, uint64 *delta) {
     if (head == NULL || id == NULL || delta == NULL) {
         return ERR;
     }
