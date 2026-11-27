@@ -10,13 +10,11 @@ static bool overlaps(byte *a, int32 na, byte *b, int32 nb) {
 }
 
 static void bad_args(void) {
-    byte *p = nullptr;
-    byte *a = nullptr;
-    (void) kalloc(&a, 1);
+    byte *a = kalloc(1);
 
-    bool ok = kalloc(nullptr, 1) == ERR;
-    ok &= kalloc(&p, 0) == ERR;
-    ok &= kalloc(&p, -1) == ERR;
+    bool ok = a != nullptr;
+    ok &= kalloc(0) == nullptr;
+    ok &= kalloc(-1) == nullptr;
     ok &= kfree(nullptr, 1) == ERR;
     ok &= kfree(a, 0) == ERR;
     ok &= kfree(a, -1) == ERR;
@@ -26,12 +24,11 @@ static void bad_args(void) {
 }
 
 static void alloc_aligned_disjoint(void) {
-    byte *a = nullptr, *b = nullptr, *c = nullptr;
-    status_code ra = kalloc(&a, 1);
-    status_code rb = kalloc(&b, 3);
-    status_code rc = kalloc(&c, 1);
+    byte *a = kalloc(1);
+    byte *b = kalloc(3);
+    byte *c = kalloc(1);
 
-    bool ok = ra == OK && rb == OK && rc == OK;
+    bool ok = a != nullptr && b != nullptr && c != nullptr;
     byte *blk[3] = { a, b, c };
     int32 len[3] = { 1, 3, 1 };
     for (int32 i = 0; i < 3; i++) {
@@ -50,8 +47,7 @@ static void alloc_aligned_disjoint(void) {
 }
 
 static void double_free(void) {
-    byte *a = nullptr;
-    (void) kalloc(&a, 1);
+    byte *a = kalloc(1);
 
     status_code f1 = kfree(a, 1);
     status_code f2 = kfree(a, 1);
@@ -60,8 +56,7 @@ static void double_free(void) {
 }
 
 static void partial_overlap(void) {
-    byte *a = nullptr;
-    (void) kalloc(&a, 2);
+    byte *a = kalloc(2);
 
     status_code tail = kfree(a + PAGE_SIZE, 1);
     status_code both = kfree(a, 2);
@@ -79,11 +74,10 @@ static void outside_ram(void) {
 }
 
 static void metadata_page(void) {
-    byte *q = nullptr;
     intmask mask = interrupt_save();
     status_code r = kfree((byte *) META, 1);
     if (r == OK) {
-        (void) kalloc(&q, 1); // first-fit re-marks the meta page; never use q
+        (void) kalloc(1); // first-fit re-marks the meta page; never use it
     }
     interrupt_restore(mask);
 
@@ -91,13 +85,12 @@ static void metadata_page(void) {
 }
 
 static void oversize(void) {
-    byte *p = nullptr;
-    status_code r = kalloc(&p, RAM_SIZE / PAGE_SIZE + 1);
-    if (r == OK) {
+    byte *p = kalloc(RAM_SIZE / PAGE_SIZE + 1);
+    if (p != nullptr) {
         kfree(p, (RAM_END - (uint64) p) / PAGE_SIZE);
     }
 
-    CHECK("kalloc_oversize_fails", r == ERR);
+    CHECK("kalloc_oversize_fails", p == nullptr);
 }
 
 void test_memory(void) {

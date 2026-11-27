@@ -71,12 +71,12 @@ void mem_init() {
  * responsibility.
  */
 
-syscall kalloc(byte **base, int32 n) {
+byte *kalloc(int32 n) {
     intmask mask = interrupt_save();
 
-    if (base == nullptr || n <= 0) {
+    if (n <= 0) {
         interrupt_restore(mask);
-        return ERR;
+        return nullptr;
     }
 
     int32 start_index = -1;
@@ -94,13 +94,11 @@ syscall kalloc(byte **base, int32 n) {
         }
     }
 
-    status_code result = OK;
+    byte *result = nullptr;
     if (len != n) {
-        result = ERR;
-        *base = nullptr;
+        result = nullptr;
     } else {
-        result = OK;
-        *base = pages_start + PAGE_SIZE * start_index;
+        result = pages_start + PAGE_SIZE * start_index;
         for (int32 i = start_index; i < start_index + n; i++) {
             set_page_allocated(i);
         }

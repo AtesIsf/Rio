@@ -47,7 +47,7 @@ void mem_init();
 /* Memory Manager Endpoint Functions */
 
 [[nodiscard]]
-syscall kalloc(byte **base, int32 n);
+byte *kalloc(int32 n);
 
 syscall kfree(byte *base, int32 n);
 

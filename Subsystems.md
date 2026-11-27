@@ -17,7 +17,7 @@ This document describes each subsystem shown in the architecture flowchart, incl
 
 | Endpoint | Description |
 | :--- | :--- |
-| `syscall kalloc(byte *base, int32 n)` | Allocates `n` contiguous 4 KiB physical pages and writes the starting address to `base`. Returns `OK` or `ERR`. |
+| `byte *kalloc(int32 n)` | Allocates `n` contiguous 4 KiB physical pages. Returns the starting address, or `nullptr` if `n <= 0` or no such run is free. |
 | `syscall kfree(byte *base, int32 n)` | Deallocates `n` contiguous 4 KiB physical pages starting at `base`. Returns `OK` or `ERR`. |
 
 ## Process Manager
