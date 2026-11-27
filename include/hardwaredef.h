@@ -152,4 +152,13 @@ static inline void write_stimecmp(uint64 val) {
     __asm__ volatile("csrw stimecmp, %0" : : "r"(val));
 }
 
+/**
+ * **satp**: paging register
+ * 63:60 | MODE : 0 = Bare, 8 = Sv39, 9 = Sv48, 10 = Sv57
+ * 59:44 | ASID : Address-space ID
+ * 43:0  | PPN  : Physical Page Number (of the root page table)
+ *
+ * Currently, satp is set to 0 on boot
+ */
+
 #endif
