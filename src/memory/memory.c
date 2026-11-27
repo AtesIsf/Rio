@@ -1,5 +1,7 @@
 #include <rio.h>
 
+#include <stdckdint.h>
+
 // exported from the linker, first byte after the kernel, 16 byte aligned
 extern byte kernel_end;
 
@@ -117,8 +119,10 @@ syscall kalloc(byte **base, int32 n) {
 syscall kfree(byte *base, int32 n) {
     intmask mask = interrupt_save();
 
+    uint64 bytes;
     if (base == nullptr || n <= 0 || base < usable_pages_start
-        || base > (byte *) RAM_END - n * PAGE_SIZE) {
+        || ckd_mul(&bytes, n, PAGE_SIZE) // if n * PAGE_SIZE overflows, true
+        || base > (byte *) RAM_END - bytes) {
         interrupt_restore(mask);
         return ERR;
     }

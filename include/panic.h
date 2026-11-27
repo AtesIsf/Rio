@@ -3,6 +3,7 @@
 
 #include <process.h>
 
-[[noreturn]] void panic(const char *);
+[[noreturn]]
+void panic(const char *);
 
 #endif
