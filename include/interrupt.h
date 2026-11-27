@@ -13,14 +13,16 @@
 
 // TODO: Add more later
 /* IRQ DEFINITIONS */
-#define IRQ_UNKNOWN (0)
-#define IRQ_CLOCK   (1)
+typedef enum irq : uint8 {
+    IRQ_UNKNOWN = 0,
+    IRQ_CLOCK   = 1,
+    IRQ_COUNT, // keep last: sizes the handler table
+} irq;
 
-// TODO: May wanna define a better constant later. 8 is random
 /**
  * Indexed by the IRQ
  */
-extern void *interrupt_handler_table[8];
+extern void *interrupt_handler_table[IRQ_COUNT];
 
 /* function prototypes */
 

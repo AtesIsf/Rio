@@ -1,6 +1,6 @@
 #include <rio.h>
 
-void *interrupt_handler_table[8];
+void *interrupt_handler_table[IRQ_COUNT];
 
 void interrupts_init() {
     interrupt_handler_table[0] = nullptr;
@@ -17,8 +17,12 @@ status_code handle_interrupt() {
 
     irq code = get_irq();
     // dereference a function pointer that takes no arguments
-    status_code (*handler)();
-    handler = interrupt_handler_table[code];
+    status_code (*handler)() = nullptr;
+
+    if (code < IRQ_COUNT) {
+        handler = interrupt_handler_table[code];
+    }
+
     // don't dereference if NULL
     status_code return_val = handler == nullptr ? ERR : handler();
 

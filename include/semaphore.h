@@ -15,13 +15,15 @@
 
 #define SEMQUEUE_NULL (-1)
 
-#define SEM_FREE (0)
-#define SEM_USED (1)
+enum sem_state : uint8 {
+    SEM_FREE = 0,
+    SEM_USED = 1,
+};
 
 struct SemEntry {
     struct LobbyEntry head;
     int32 count;
-    int32 state;
+    enum sem_state state;
 };
 
 extern struct SemEntry g_semaphores[N_SEM];
