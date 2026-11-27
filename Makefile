@@ -50,7 +50,8 @@ run: $(TARGET)
 	$(QEMU) -machine virt -bios none -kernel $(TARGET) -serial mon:stdio
 
 test: $(TEST_TARGET)
-	$(QEMU) -machine virt -bios none -kernel $(TEST_TARGET) -serial mon:stdio -nographic
+	timeout -k 5 60 $(QEMU) -machine virt -bios none \
+	    -kernel $(TEST_TARGET) -serial mon:stdio -nographic
 
 clean:
 	rm -f $(TARGET) $(TEST_TARGET)
