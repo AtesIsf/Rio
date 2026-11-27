@@ -40,7 +40,7 @@ status_code kputc(char c) {
  */
 
 status_code kprint(const char *str) {
-    if (str == NULL) return ERR;
+    if (str == nullptr) return ERR;
 
     while (*str != '\0') {
         kputc(*str);

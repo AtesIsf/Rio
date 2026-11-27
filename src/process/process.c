@@ -9,8 +9,8 @@ struct ProcessTableEntry g_process_table[N_PROCS];
 void process_table_init() {
     for (int32 i = 1; i < N_PROCS; i++) {
         g_process_table[i].ctx = (struct Context) { 0 };
-        g_process_table[i].stack_base = NULL;
-        g_process_table[i].heap_start = NULL;
+        g_process_table[i].stack_base = nullptr;
+        g_process_table[i].heap_start = nullptr;
         g_process_table[i].name = "";
         g_process_table[i].priority = 0;
         g_process_table[i].n_stack_pages = 0;
@@ -29,7 +29,7 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
                 uint32 n_heap_pages, const char *name, int32 n_args, ...) {
     intmask mask = interrupt_save();
 
-    if (fn == NULL || priority < 1 || n_args < 0) {
+    if (fn == nullptr || priority < 1 || n_args < 0) {
         interrupt_restore(mask);
         return ERR;
     }
@@ -42,14 +42,14 @@ syscall create(void *fn, int32 priority, uint32 n_stack_pages,
     }
 
     // allocate proc heap space first to ensure kmain isn't screwed
-    byte *hp = NULL;
+    byte *hp = nullptr;
     status_code result = kalloc(&hp, n_heap_pages);
     if (result == ERR) {
         interrupt_restore(mask);
         return ERR;
     }
 
-    byte *stk = NULL;
+    byte *stk = nullptr;
     result = kalloc(&stk, n_stack_pages);
     if (result == ERR) {
         kfree(hp, n_heap_pages);

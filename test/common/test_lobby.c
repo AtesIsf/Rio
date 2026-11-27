@@ -14,13 +14,13 @@ static void bad_args(void) {
     pid id = 0;
     uint64 d = 0;
 
-    bool ok = lobby_enqueue(NULL, A, 0) == ERR;
+    bool ok = lobby_enqueue(nullptr, A, 0) == ERR;
     ok &= lobby_enqueue(&h, -1, 0) == ERR;
     ok &= lobby_enqueue(&h, N_PROCS, 0) == ERR;
-    ok &= lobby_dequeue(NULL, &id) == ERR;
-    ok &= lobby_dequeue(&h, NULL) == ERR;
+    ok &= lobby_dequeue(nullptr, &id) == ERR;
+    ok &= lobby_dequeue(&h, nullptr) == ERR;
     ok &= lobby_dequeue(&h, &id) == ERR;
-    ok &= lobby_peek(&h, &id, NULL) == ERR;
+    ok &= lobby_peek(&h, &id, nullptr) == ERR;
     ok &= lobby_peek(&h, &id, &d) == ERR;
     ok &= lobby_remove(&h, A) == ERR;
     CHECK("lobby_rejects_bad_args", ok);

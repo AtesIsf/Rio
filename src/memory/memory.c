@@ -72,7 +72,7 @@ void mem_init() {
 syscall kalloc(byte **base, int32 n) {
     intmask mask = interrupt_save();
 
-    if (base == NULL || n <= 0) {
+    if (base == nullptr || n <= 0) {
         interrupt_restore(mask);
         return ERR;
     }
@@ -95,7 +95,7 @@ syscall kalloc(byte **base, int32 n) {
     status_code result = OK;
     if (len != n) {
         result = ERR;
-        *base = NULL;
+        *base = nullptr;
     } else {
         result = OK;
         *base = pages_start + PAGE_SIZE * start_index;
@@ -117,7 +117,7 @@ syscall kalloc(byte **base, int32 n) {
 syscall kfree(byte *base, int32 n) {
     intmask mask = interrupt_save();
 
-    if (base == NULL || n <= 0 || base < usable_pages_start
+    if (base == nullptr || n <= 0 || base < usable_pages_start
         || base > (byte *) RAM_END - n * PAGE_SIZE) {
         interrupt_restore(mask);
         return ERR;

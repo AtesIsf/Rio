@@ -67,7 +67,7 @@ syscall sem_release(sem id) {
 syscall sem_create(int32 count, sem *id) {
     intmask mask = interrupt_save();
 
-    if (count < 0 || id == NULL) {
+    if (count < 0 || id == nullptr) {
         interrupt_restore(mask);
         return ERR;
     }

@@ -4,7 +4,7 @@ syscall panic(const char *msg) {
     intmask mask = interrupt_save();
 
     kputs("<---- KERNEL PANIC ---->");
-    if (msg != NULL) {
+    if (msg != nullptr) {
         kprintf(">> Description: %s\n", msg);
     }
 

@@ -7,6 +7,6 @@ void vm_init() {
 }
 
 byte *kernel_vm_init() {
-    return NULL;
+    return nullptr;
 }
 

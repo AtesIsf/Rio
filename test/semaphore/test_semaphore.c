@@ -25,7 +25,7 @@ static pid start_waiter(sem *s) {
 static void bad_create(void) {
     sem s = -1;
     bool ok = sem_create(-1, &s) == ERR;
-    ok &= sem_create(0, NULL) == ERR;
+    ok &= sem_create(0, nullptr) == ERR;
     CHECK("sem_create_rejects_bad_args", ok);
 }
 

@@ -10,14 +10,14 @@ static bool overlaps(byte *a, int32 na, byte *b, int32 nb) {
 }
 
 static void bad_args(void) {
-    byte *p = NULL;
-    byte *a = NULL;
+    byte *p = nullptr;
+    byte *a = nullptr;
     kalloc(&a, 1);
 
-    bool ok = kalloc(NULL, 1) == ERR;
+    bool ok = kalloc(nullptr, 1) == ERR;
     ok &= kalloc(&p, 0) == ERR;
     ok &= kalloc(&p, -1) == ERR;
-    ok &= kfree(NULL, 1) == ERR;
+    ok &= kfree(nullptr, 1) == ERR;
     ok &= kfree(a, 0) == ERR;
     ok &= kfree(a, -1) == ERR;
     bool freed = kfree(a, 1) == OK;
@@ -26,7 +26,7 @@ static void bad_args(void) {
 }
 
 static void alloc_aligned_disjoint(void) {
-    byte *a = NULL, *b = NULL, *c = NULL;
+    byte *a = nullptr, *b = nullptr, *c = nullptr;
     status_code ra = kalloc(&a, 1);
     status_code rb = kalloc(&b, 3);
     status_code rc = kalloc(&c, 1);
@@ -50,7 +50,7 @@ static void alloc_aligned_disjoint(void) {
 }
 
 static void double_free(void) {
-    byte *a = NULL;
+    byte *a = nullptr;
     kalloc(&a, 1);
 
     status_code f1 = kfree(a, 1);
@@ -60,7 +60,7 @@ static void double_free(void) {
 }
 
 static void partial_overlap(void) {
-    byte *a = NULL;
+    byte *a = nullptr;
     kalloc(&a, 2);
 
     status_code tail = kfree(a + PAGE_SIZE, 1);
@@ -79,7 +79,7 @@ static void outside_ram(void) {
 }
 
 static void metadata_page(void) {
-    byte *q = NULL;
+    byte *q = nullptr;
     intmask mask = interrupt_save();
     status_code r = kfree((byte *) META, 1);
     if (r == OK) {
@@ -91,7 +91,7 @@ static void metadata_page(void) {
 }
 
 static void oversize(void) {
-    byte *p = NULL;
+    byte *p = nullptr;
     status_code r = kalloc(&p, RAM_SIZE / PAGE_SIZE + 1);
     if (r == OK) {
         kfree(p, (RAM_END - (uint64) p) / PAGE_SIZE);

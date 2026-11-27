@@ -40,8 +40,8 @@ static bool loopback_works(void) {
 }
 
 static void null_and_empty(void) {
-    bool ok = kprint(NULL) == ERR;
-    ok &= kputs(NULL) == ERR;
+    bool ok = kprint(nullptr) == ERR;
+    ok &= kputs(nullptr) == ERR;
     ok &= kprint("") == OK;
     CHECK("kprint_null_and_empty", ok);
 }

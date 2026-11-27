@@ -16,7 +16,7 @@ void lobby_init() {
  */
 
 status_code lobby_dequeue(struct LobbyEntry *head, pid *id) {
-    if (head == NULL || id == NULL) {
+    if (head == nullptr || id == nullptr) {
         return ERR;
     }
     pid next_id = head->next;
@@ -40,7 +40,7 @@ status_code lobby_dequeue(struct LobbyEntry *head, pid *id) {
  */
 
 status_code lobby_enqueue(struct LobbyEntry *head, pid id, uint64 delta) {
-    if (head == NULL || !validpid(id)) {
+    if (head == nullptr || !validpid(id)) {
         return ERR;
     }
 
@@ -92,7 +92,7 @@ status_code lobby_enqueue(struct LobbyEntry *head, pid id, uint64 delta) {
  */
 
 status_code lobby_peek(struct LobbyEntry *head, pid *id, uint64 *delta) {
-    if (head == NULL || id == NULL || delta == NULL) {
+    if (head == nullptr || id == nullptr || delta == nullptr) {
         return ERR;
     }
 
@@ -114,7 +114,7 @@ status_code lobby_peek(struct LobbyEntry *head, pid *id, uint64 *delta) {
  */
 
 status_code lobby_remove(struct LobbyEntry *head, pid id) {
-    if (head == NULL || !validpid(id)) {
+    if (head == nullptr || !validpid(id)) {
         return ERR;
     }
 
@@ -156,7 +156,7 @@ status_code lobby_remove(struct LobbyEntry *head, pid id) {
  */
 
 status_code decrement_delta(struct LobbyEntry *head, pid id) {
-    if (head == NULL || !validpid(id)) {
+    if (head == nullptr || !validpid(id)) {
         return ERR;
     }
 

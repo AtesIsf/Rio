@@ -23,7 +23,8 @@ typedef int32 pid; // can't be unsigned, try and see the warnings if you want
 typedef int32 sem;
 typedef uint64 intmask;
 typedef uint64 irq;
-#define NULL ((void *) 0x0)
+// Removed this to use nullptr from C23 instead => less prone to bugs
+// #define NULL ((void *) 0x0)
 
 // type limits
 #define INT8_MAX  (__INT8_MAX__)

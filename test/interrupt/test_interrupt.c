@@ -23,9 +23,9 @@ static bool errors_keep(bool want) {
     bool ok = true;
 
 #define STEP(call) do { ok &= ((call) == ERR) && (sie() == want); } while (0)
-    STEP(kalloc(NULL, 1));
-    STEP(kfree(NULL, 1));
-    STEP(create(NULL, 10, 1, 1, "x", 0));
+    STEP(kalloc(nullptr, 1));
+    STEP(kfree(nullptr, 1));
+    STEP(create(nullptr, 10, 1, 1, "x", 0));
     STEP(resume(-1));
     STEP(kill(-1));
     STEP(scheduler_add(-1));

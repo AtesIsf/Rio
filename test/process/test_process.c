@@ -21,7 +21,7 @@ static process args10(uint64 a0, uint64 a1, uint64 a2, uint64 a3,
 }
 
 static void bad_args(void) {
-    bool ok = create(NULL, 10, 1, 1, "x", 0) == ERR;
+    bool ok = create(nullptr, 10, 1, 1, "x", 0) == ERR;
     ok &= create(noop, 0, 1, 1, "x", 0) == ERR;
     ok &= create(noop, -5, 1, 1, "x", 0) == ERR;
     ok &= create(noop, 10, 1, 1, "x", -1) == ERR;
@@ -38,7 +38,7 @@ static void suspended_setup_and_kill(void) {
     bool fields = e->state == PROC_SUSP && e->priority == 42 &&
                   e->n_stack_pages == 2 && e->n_heap_pages == 3 &&
                   e->name[0] == 'p' && e->name[1] == '2';
-    bool aligned = stk != NULL && hp != NULL &&
+    bool aligned = stk != nullptr && hp != nullptr &&
                    (uint64) stk % PAGE_SIZE == 0 &&
                    (uint64) hp % PAGE_SIZE == 0;
     bool disjoint = stk + 2 * PAGE_SIZE <= hp || hp + 3 * PAGE_SIZE <= stk;
@@ -131,7 +131,7 @@ static void table_exhaustion(void) {
 
 // shortcut: assumes first-fit puts the heap on the lowest free page
 static void create_failure_leaks_heap(void) {
-    byte *a = NULL;
+    byte *a = nullptr;
     kalloc(&a, 1);
     kfree(a, 1);
 

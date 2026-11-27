@@ -3,7 +3,7 @@
 void *interrupt_handler_table[8];
 
 void interrupts_init() {
-    interrupt_handler_table[0] = NULL;
+    interrupt_handler_table[0] = nullptr;
     interrupt_handler_table[1] = handler_clock;
     write_stvec((uint64) dispatch_interrupt);
     write_sstatus(SSTATUS_SIE);
@@ -20,7 +20,7 @@ status_code handle_interrupt() {
     status_code (*handler)();
     handler = interrupt_handler_table[code];
     // don't dereference if NULL
-    status_code return_val = handler == NULL ? ERR : handler();
+    status_code return_val = handler == nullptr ? ERR : handler();
 
     interrupt_restore(mask);
     return return_val;
