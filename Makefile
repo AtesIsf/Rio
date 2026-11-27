@@ -3,7 +3,9 @@ CC            := $(CROSS_COMPILE)gcc
 AS            := $(CROSS_COMPILE)as
 QEMU          := qemu-system-riscv64
 
-CFLAGS        ?= -Wall -Wextra -mcmodel=medany -ffreestanding -std=c23 -Iinclude
+CFLAGS        ?= -Wall -Wextra -Werror -mcmodel=medany -ffreestanding \
+                 -std=c23 -Iinclude
+ASFLAGS       ?= --fatal-warnings
 LDFLAGS       ?= -T linker.ld -nostdlib
 LDLIBS        ?= -lgcc
 
@@ -40,7 +42,7 @@ $(BIN_DIR)/%.o: src/%.c
 
 $(BIN_DIR)/%.o: src/%.s
 	@mkdir -p $(dir $@)
-	$(AS) -c $< -o $@
+	$(AS) $(ASFLAGS) -c $< -o $@
 
 $(BIN_DIR)/test/%.o: test/%.c
 	@mkdir -p $(dir $@)
