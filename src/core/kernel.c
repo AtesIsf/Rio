@@ -12,6 +12,7 @@
 
 void __kentry(void) {
     mem_init();
+    vm_init();
     process_table_init();
     lobby_init();
     semaphore_init();

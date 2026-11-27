@@ -153,12 +153,16 @@ static inline void write_stimecmp(uint64 val) {
 }
 
 /**
- * **satp**: paging register
+ * **satp**: Supervisor Address Translation and Protection register
+ *
  * 63:60 | MODE : 0 = Bare, 8 = Sv39, 9 = Sv48, 10 = Sv57
  * 59:44 | ASID : Address-space ID
  * 43:0  | PPN  : Physical Page Number (of the root page table)
  *
  * Currently, satp is set to 0 on boot
+ *
+ * The kernel must write the address of the root page table into satp.
+ * (In multi-core systems, each core has its own satp)
  */
 
 #endif

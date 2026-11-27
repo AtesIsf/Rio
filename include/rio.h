@@ -19,6 +19,7 @@
 #include <scheduler.h>
 #include <semaphore.h>
 #include <sleep.h>
+#include <vm.h>
 // IWYU pragma: end_exports
 
 /* Other Prototypes */
