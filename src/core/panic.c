@@ -1,7 +1,7 @@
 #include <rio.h>
 
-syscall panic(const char *msg) {
-    intmask mask = interrupt_save();
+void panic(const char *msg) {
+    (void) interrupt_save(); // never restored: panic doesn't return
 
     kputs("<---- KERNEL PANIC ---->");
     if (msg != nullptr) {
@@ -9,8 +9,5 @@ syscall panic(const char *msg) {
     }
 
     while (true);
-
-    interrupt_restore(mask);
-    return OK;
 }
 

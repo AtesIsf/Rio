@@ -223,6 +223,7 @@ syscall kill(pid id) {
 
 void procend() {
     kill(curr_pid);
+    panic("procend: kill returned");
 }
 
 int32 get_valid_pid() {

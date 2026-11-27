@@ -10,7 +10,7 @@
  * main process. Also serves as the NULL process afterwards.
  */
 
-void __kentry(void) {
+[[noreturn]] void __kentry(void) {
     mem_init();
     vm_init();
     process_table_init();

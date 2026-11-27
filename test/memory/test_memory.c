@@ -12,7 +12,7 @@ static bool overlaps(byte *a, int32 na, byte *b, int32 nb) {
 static void bad_args(void) {
     byte *p = nullptr;
     byte *a = nullptr;
-    kalloc(&a, 1);
+    (void) kalloc(&a, 1);
 
     bool ok = kalloc(nullptr, 1) == ERR;
     ok &= kalloc(&p, 0) == ERR;
@@ -51,7 +51,7 @@ static void alloc_aligned_disjoint(void) {
 
 static void double_free(void) {
     byte *a = nullptr;
-    kalloc(&a, 1);
+    (void) kalloc(&a, 1);
 
     status_code f1 = kfree(a, 1);
     status_code f2 = kfree(a, 1);
@@ -61,7 +61,7 @@ static void double_free(void) {
 
 static void partial_overlap(void) {
     byte *a = nullptr;
-    kalloc(&a, 2);
+    (void) kalloc(&a, 2);
 
     status_code tail = kfree(a + PAGE_SIZE, 1);
     status_code both = kfree(a, 2);
@@ -83,7 +83,7 @@ static void metadata_page(void) {
     intmask mask = interrupt_save();
     status_code r = kfree((byte *) META, 1);
     if (r == OK) {
-        kalloc(&q, 1); // first-fit re-marks the metadata page; never use q
+        (void) kalloc(&q, 1); // first-fit re-marks the meta page; never use q
     }
     interrupt_restore(mask);
 

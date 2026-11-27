@@ -34,9 +34,9 @@ static void fifo(void) {
     lobby_enqueue(&h, A, 0);
     lobby_enqueue(&h, B, 0);
     lobby_enqueue(&h, C, 0);
-    lobby_dequeue(&h, &id[0]);
-    lobby_dequeue(&h, &id[1]);
-    lobby_dequeue(&h, &id[2]);
+    (void) lobby_dequeue(&h, &id[0]);
+    (void) lobby_dequeue(&h, &id[1]);
+    (void) lobby_dequeue(&h, &id[2]);
     status_code empty = lobby_dequeue(&h, &extra);
 
     CHECK("lobby_fifo_equal_delta",
@@ -55,7 +55,7 @@ static void delta_relative(void) {
     bool first = p1 == OK && id == B && d == 5;
     status_code rm = lobby_remove(&h, A);
     pid out = -1;
-    lobby_dequeue(&h, &out);
+    (void) lobby_dequeue(&h, &out);
     status_code p2 = lobby_peek(&h, &id, &d);
     bool second = p2 == OK && id == C && d == 10;
     drain(&h);

@@ -21,10 +21,12 @@ struct LobbyEntry {
 
 void lobby_init();
 
+[[nodiscard]]
 status_code lobby_dequeue(struct LobbyEntry *head, pid *id);
 
 status_code lobby_enqueue(struct LobbyEntry *head, pid id, uint64 delta);
 
+[[nodiscard]]
 status_code lobby_peek(struct LobbyEntry *head, pid *id, uint64 *delta);
 
 status_code lobby_remove(struct LobbyEntry *head, pid id);

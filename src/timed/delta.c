@@ -26,7 +26,7 @@ status_code delta_tick() {
     defer_yield = true;
     bool resumed_procs = false;
     while (delta == 0) {
-        lobby_dequeue(&g_delta, &proc);
+        (void) lobby_dequeue(&g_delta, &proc);
         // handle sleeping proc
         if (g_process_table[proc].state == PROC_SLEEP) {
             resume(proc);

@@ -16,7 +16,7 @@ static bool is_empty(pid p) {
 // Creates a semaphore with count 0 and a priority-100 child blocked on it.
 static pid start_waiter(sem *s) {
     g_step = 0;
-    sem_create(0, s);
+    (void) sem_create(0, s);
     pid w = create(waiter, 100, 1, 1, "waiter", 1, (uint64) *s);
     resume(w);
     return w;
@@ -31,7 +31,7 @@ static void bad_create(void) {
 
 static void bad_or_freed_id(void) {
     sem s = -1;
-    sem_create(1, &s);
+    (void) sem_create(1, &s);
     sem_free(s);
 
     bool ok = true;
@@ -47,7 +47,7 @@ static void bad_or_freed_id(void) {
 
 static void counts_without_blocking(void) {
     sem s = -1;
-    sem_create(2, &s);
+    (void) sem_create(2, &s);
 
     status_code w1 = sem_wait(s);
     status_code w2 = sem_wait(s);

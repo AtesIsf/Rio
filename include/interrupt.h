@@ -30,6 +30,7 @@ void interrupts_init();
 
 status_code handle_interrupt();
 
+[[nodiscard]]
 irq get_irq();
 
 status_code handler_clock();

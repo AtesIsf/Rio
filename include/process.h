@@ -19,12 +19,14 @@ typedef status_code syscall;
 #define PROC_NOSEM (-1) // for empty sem_id in the process table
 
 // process states
-#define PROC_CURR   (0) // current running proc
-#define PROC_READY  (1) // in ready list
-#define PROC_SLEEP  (2) // sleeping
-#define PROC_WAIT   (3) // waiting on a semaphore
-#define PROC_EMPTY  (4) // unused entry
-#define PROC_SUSP   (5) // suspended process
+enum proc_state : uint8 {
+    PROC_CURR  = 0, // current running proc
+    PROC_READY = 1, // in ready list
+    PROC_SLEEP = 2, // sleeping
+    PROC_WAIT  = 3, // waiting on a semaphore
+    PROC_EMPTY = 4, // unused entry
+    PROC_SUSP  = 5, // suspended process
+};
 
 // Process table
 
@@ -38,7 +40,7 @@ struct ProcessTableEntry {
     int32 n_stack_pages;
     int32 n_heap_pages;
     sem sem_id;
-    byte state;
+    enum proc_state state;
 };
 
 extern struct ProcessTableEntry g_process_table[N_PROCS];
@@ -47,6 +49,7 @@ extern struct ProcessTableEntry g_process_table[N_PROCS];
 
 void process_table_init();
 
+[[nodiscard]]
 syscall create(void *fn, int32 priority, uint32 n_stack_pages,
                 uint32 n_heap_pages, const char *name, int32 n_args, ...);
 
@@ -54,8 +57,10 @@ syscall resume(pid id);
 
 syscall kill(pid id);
 
+[[noreturn]]
 void procend();
 
+[[nodiscard]] 
 int32 get_valid_pid();
 
 // macros

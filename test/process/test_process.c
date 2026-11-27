@@ -132,7 +132,7 @@ static void table_exhaustion(void) {
 // shortcut: assumes first-fit puts the heap on the lowest free page
 static void create_failure_leaks_heap(void) {
     byte *a = nullptr;
-    kalloc(&a, 1);
+    (void) kalloc(&a, 1);
     kfree(a, 1);
 
     status_code r = create(noop, 42, 0, 1, "nostack", 0);

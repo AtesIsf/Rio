@@ -25,8 +25,10 @@ extern struct SchedQueueEntry g_sched_queue[N_PROCS + 2];
 
 void sched_queue_init();
 
+[[nodiscard]]
 bool sched_queue_includes(pid id);
 
+[[nodiscard]]
 status_code sched_queue_dequeue(pid *id);
 
 status_code sched_queue_enqueue(pid id, int32 priority);

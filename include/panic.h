@@ -3,6 +3,6 @@
 
 #include <process.h>
 
-syscall panic(const char *);
+[[noreturn]] void panic(const char *);
 
 #endif
