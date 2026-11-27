@@ -14,11 +14,11 @@
 #endif
 
 /* PTE flags */
-#define PTE_V (1L << 0) // valid
-#define PTE_R (1L << 1) // readable
-#define PTE_W (1L << 2) // writeable
-#define PTE_X (1L << 3) // CPU views the content as executable instructions
-#define PTE_U (1L << 4) // Can user space instructions access this?
+#define PTE_V (1UL << 0) // valid
+#define PTE_R (1UL << 1) // readable
+#define PTE_W (1UL << 2) // writeable
+#define PTE_X (1UL << 3) // CPU views the content as executable instructions
+#define PTE_U (1UL << 4) // Can user space instructions access this?
 
 void vm_init();
 
