@@ -165,4 +165,38 @@ static inline void write_stimecmp(uint64 val) {
  * (In multi-core systems, each core has its own satp)
  */
 
+static inline uint64 read_satp() {
+    uint64 val;
+    __asm__ volatile("csrr %0, satp" : "=r"(val));
+    return val;
+}
+
+static inline void write_satp(uint64 val) {
+    __asm__ volatile("csrw satp, %0" : : "r"(val));
+}
+
+// remember, these are in the last 4 bits of 64, so << 60
+enum vm_type : uint64 {
+    VM_BARE = 0,
+    VM_SV39 = 8UL << 60,
+    VM_SV48 = 9UL << 60,
+    VM_SV57 = 10UL << 60,
+};
+
+// per the hardware manuals, divide root page table addr by 2^12 (4096)
+// to get the PPN, to be stored in bits 43:0 as seen above
+// Intuitively, this is addr / PAGE_SIZE to get some PPN
+#define INIT_SATP(root_addr) (VM_SV39 | ((uint64) root_addr) >> 12)
+
+/** 
+ * This both:
+ * > flushes the TLB 
+ * > ensures hardware "walks" match software "walks"
+ * You can see how 2 is linked to 1 intuitively
+ */
+static inline void sfence_vma() {
+    // zero, zero means flush all TLB entries apparently
+    __asm__ volatile("sfence.vma zero, zero" : : : "memory");
+}
+
 #endif

@@ -26,7 +26,7 @@ void vm_init();
 byte *kernel_vm_init();
 
 [[nodiscard]]
-byte *find_pte(byte *page_table_root, byte *virt_addr);
+byte *pte_walk(byte *page_table_root, byte *virt_addr);
 
 [[nodiscard]]
 status_code map(byte *page_table_root);
