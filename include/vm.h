@@ -7,8 +7,6 @@
 /* RISC-V also has other types of paging for bigger pages such as SV-48 */
 /* Not suprisingly, RISC-V has a TLB */
 
-/* TODO: write a page fault handler later */
-
 typedef uint64 pte_t;
 
 #ifndef PAGE_SIZE // should be defined in hardwaredef.h

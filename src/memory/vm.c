@@ -1,4 +1,3 @@
-#include "vm.h"
 #include <rio.h>
 
 #include <stdckdint.h>
