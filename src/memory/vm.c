@@ -3,8 +3,8 @@
 
 #include <stdckdint.h>
 
-extern uint64 text_end; // provided by linker
-static byte *kernel_page_table;
+extern byte text_end; // provided by linker
+static pte_t *kernel_page_table;
 
 void vm_init() {
     kernel_vm_init();
@@ -22,11 +22,11 @@ void vm_init() {
 
 void kernel_vm_init() {
     // this is the file-scoped static variable
-    kernel_page_table = kalloc(1);
+    kernel_page_table = (pte_t *) kalloc(1);
     if (kernel_page_table == nullptr) {
         panic("panic: kernel page table kalloc error");
     }
-    memset(kernel_page_table, 0, PAGE_SIZE);
+    memset((byte *) kernel_page_table, 0, PAGE_SIZE);
 
     /* qemu virt devices */
     status_code result = OK;
@@ -56,15 +56,15 @@ void kernel_vm_init() {
 
     // kernel text => executable & read
     result = map_pages(kernel_page_table, (byte *) KERNEL_BASE, 
-           (byte *) KERNEL_BASE, (text_end - KERNEL_BASE) / PAGE_SIZE,
+           (byte *) KERNEL_BASE, ((uint64) &text_end - KERNEL_BASE) / PAGE_SIZE,
            PTE_R | PTE_X);
     if (result == ERR) {
         panic("kernel_vm_init: failed to map kernel text");
     }
 
     // kernel data & physical ram => read & write
-    result = map_pages(kernel_page_table, (byte *) text_end, 
-           (byte *) text_end, (RAM_END - text_end) / PAGE_SIZE,
+    result = map_pages(kernel_page_table, (byte *) &text_end, 
+           (byte *) &text_end, (RAM_END - (uint64) &text_end) / PAGE_SIZE,
            PTE_R | PTE_W);
     if (result == ERR) {
         panic("kernel_vm_init: failed to map kernel data & ram");
@@ -83,15 +83,14 @@ void kernel_vm_init() {
  * The src and dest must be PAGE_SIZE aligned
  */
 
-status_code map_pages(byte *page_table_root, byte *src, byte *dest, 
+status_code map_pages(pte_t *page_table_root, byte *src, byte *dest, 
                       uint64 n_pages, uint64 flags) {
     uint64 buf_for_ckd;
     if (page_table_root == nullptr || src == nullptr || dest == nullptr
-            || (uint64) src % PAGE_SIZE != 0
-            || (uint64) dest % PAGE_SIZE != 0
-            || ckd_mul(&buf_for_ckd, n_pages, PAGE_SIZE)
-            || ckd_add(&buf_for_ckd, buf_for_ckd, (uint64) usable_pages_start)
-            || buf_for_ckd > RAM_END) {
+        || (uint64) src % PAGE_SIZE != 0
+        || (uint64) dest % PAGE_SIZE != 0
+        || ckd_mul(&buf_for_ckd, n_pages, PAGE_SIZE)
+        || ckd_add(&buf_for_ckd, buf_for_ckd, (uint64) usable_pages_start) ) {
         return ERR;
     }
 
@@ -99,12 +98,12 @@ status_code map_pages(byte *page_table_root, byte *src, byte *dest,
     uint64 pa = (uint64) dest;
 
     uint64 bytes;
-    bool overflows = ckd_mul(&bytes, n_pages - 1, PAGE_SIZE);
+    bool overflows = ckd_mul(&bytes, n_pages, PAGE_SIZE);
     if (overflows) return ERR;
     uint64 last = va + bytes;
 
     while (va != last) {
-        byte *pte = pte_walk(page_table_root, (byte *) va, true);
+        pte_t *pte = pte_walk(page_table_root, (byte *) va, true);
         if (pte == nullptr) return ERR;
 
         if (*pte & PTE_V) {
@@ -133,23 +132,23 @@ status_code map_pages(byte *page_table_root, byte *src, byte *dest,
  * This function basically mimics the RISC-V hardware in its search.
  */
 
-byte *pte_walk(byte *page_table_root, byte *virt_addr, bool alloc) {
+pte_t *pte_walk(pte_t *page_table_root, byte *virt_addr, bool alloc) {
     if (page_table_root == nullptr || virt_addr == nullptr 
             || (uint64) virt_addr > MAX_VIRT_ADDR) {
         return nullptr;
     }
 
     for (int32 level = 2; level > 0; level--) {
-        byte *pte = &page_table_root[VPN_INDEX(level, virt_addr)];
+        pte_t *pte = &page_table_root[VPN_INDEX(level, virt_addr)];
         if (*pte & PTE_V) { // basically if the pte valid
-            page_table_root = (byte *) PTE2PA((uint64) *pte); //next lvl
+            page_table_root = (pte_t *) PTE2PA((uint64) *pte); //next lvl
         } else if (!alloc) {
             return nullptr;
         } else {
-            page_table_root = kalloc(1);
+            page_table_root = (pte_t *) kalloc(1);
             if (page_table_root == nullptr) return nullptr;
 
-            status_code result = memset(page_table_root, 0, PAGE_SIZE);
+            status_code result = memset((byte *) page_table_root, 0, PAGE_SIZE);
             if (result == ERR) return nullptr;
             *pte = PA2PTE(page_table_root) | PTE_V;
         }

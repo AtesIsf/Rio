@@ -10,6 +10,7 @@ SECTIONS {
 	.text : ALIGN(4K) {
 		*(.init);
 		*(.text);
+        . = ALIGN(4K);
         PROVIDE(text_end = .);
 	}
 	.bss : ALIGN(4K) {

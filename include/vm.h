@@ -9,6 +9,8 @@
 
 /* TODO: write a page fault handler later */
 
+typedef uint64 pte_t;
+
 #ifndef PAGE_SIZE // should be defined in hardwaredef.h
 #define PAGE_SIZE (4096)
 #endif
@@ -29,10 +31,10 @@ void vm_init();
 void kernel_vm_init();
 
 [[nodiscard]]
-byte *pte_walk(byte *page_table_root, byte *virt_addr, bool alloc);
+pte_t *pte_walk(pte_t *page_table_root, byte *virt_addr, bool alloc);
 
 [[nodiscard]]
-status_code map_pages(byte *page_table_root, byte *src, byte *dest,
+status_code map_pages(pte_t *page_table_root, byte *src, byte *dest,
                       uint64 n_pages, uint64 flags);
 
 /* macros */

@@ -13,12 +13,12 @@
 [[noreturn]]
 void __kentry(void) {
     mem_init();
-    vm_init();
     process_table_init();
     lobby_init();
     semaphore_init();
     delta_init();
     sched_queue_init();
+    vm_init();
     clock_init();
     interrupts_init();
 
