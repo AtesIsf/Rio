@@ -134,10 +134,30 @@ static void create_failure_leaks_heap(void) {
     byte *a = kalloc(1);
     kfree(a, 1);
 
+    intmask before = read_sstatus() & SSTATUS_SIE;
     status_code r = create(noop, 42, 0, 1, "nostack", 0);
+    bool kept = (read_sstatus() & SSTATUS_SIE) == before;
     bool leaked = kfree(a, 1) == OK; // also reclaims the leak
 
-    CHECK("create_fail_no_heap_leak", r == ERR && !leaked);
+    CHECK("create_fail_no_heap_leak", r == ERR && !leaked && kept);
+}
+
+// shortcut: assumes first-fit puts a stack on the lowest free page
+static void create_heap_fail_no_side_effects(void) {
+    byte *a = kalloc(1);
+    kfree(a, 1);
+    pid slot = get_valid_pid();
+    intmask before = read_sstatus() & SSTATUS_SIE;
+
+    pid r = create(noop, 42, 1, RAM_SIZE / PAGE_SIZE + 1, "noheap", 0);
+    bool kept = (read_sstatus() & SSTATUS_SIE) == before;
+    if (r != ERR) {
+        kill(r);
+    }
+    bool leaked = kfree(a, 1) == OK; // also reclaims a leak
+
+    CHECK("create_heap_fail_no_side_effects",
+          r == ERR && kept && !leaked && get_valid_pid() == slot);
 }
 
 void test_process(void) {
@@ -149,4 +169,5 @@ void test_process(void) {
     kill_ready_dequeues();
     table_exhaustion();
     create_failure_leaks_heap();
+    create_heap_fail_no_side_effects();
 }

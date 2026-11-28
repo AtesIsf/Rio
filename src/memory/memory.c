@@ -61,7 +61,18 @@ void mem_init() {
         set_page_allocated(i);
     }
 
-    usable_pages_start = &pages_start[bytes_required];
+    // This whole block page aligns usable_pages_start
+    uint64 bytes;
+    bool overflows = ckd_mul(&bytes, pages_needed, PAGE_SIZE);
+    if (overflows) {
+        panic("mem_init: pages_needed * PAGE_SIZE overflows");
+    }
+    overflows = ckd_add(&bytes, bytes, (uint64) pages_start);
+    if (overflows) {
+        panic("mem_init: bytes + pages_start overflows");
+    }
+
+    usable_pages_start = (byte *) bytes;
 }
 
 /**

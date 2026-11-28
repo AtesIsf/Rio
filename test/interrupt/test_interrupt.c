@@ -24,6 +24,7 @@ static bool errors_keep(bool want) {
 
 #define STEP(call) do { ok &= ((call) == ERR) && (sie() == want); } while (0)
     ok &= kalloc(0) == nullptr && sie() == want;
+    ok &= kalloc(RAM_SIZE / PAGE_SIZE + 1) == nullptr && sie() == want;
     STEP(kfree(nullptr, 1));
     STEP(create(nullptr, 10, 1, 1, "x", 0));
     STEP(resume(-1));
@@ -54,8 +55,18 @@ static void errors_with_sie_off(void) {
     CHECK("syscall_errors_keep_sie_off", ok);
 }
 
+static void irq_table_wired(void) {
+    void **t = interrupt_handler_table;
+
+    CHECK("irq_table_wired",
+          t[IRQ_UNKNOWN] == nullptr &&
+          t[IRQ_CLOCK] == (void *) handler_clock &&
+          t[IRQ_PG_FAULT] == (void *) handler_page_fault);
+}
+
 void test_interrupt(void) {
     nesting();
     errors_with_sie_on();
     errors_with_sie_off();
+    irq_table_wired();
 }

@@ -1,6 +1,7 @@
 #include "check.h"
 
 extern byte kernel_end;
+extern byte text_end;
 
 // same formula as mem_init: the first managed page holds the bitmap
 #define META (PAGE_ROUND_UP((uint64) &kernel_end))
@@ -93,6 +94,14 @@ static void oversize(void) {
     CHECK("kalloc_oversize_fails", p == nullptr);
 }
 
+static void text_end_aligned(void) {
+    uint64 t = (uint64) &text_end;
+
+    CHECK("text_end_page_aligned",
+          t % PAGE_SIZE == 0 && t > KERNEL_BASE &&
+          t <= (uint64) &kernel_end);
+}
+
 void test_memory(void) {
     bad_args();
     alloc_aligned_disjoint();
@@ -101,4 +110,5 @@ void test_memory(void) {
     outside_ram();
     metadata_page();
     oversize();
+    text_end_aligned();
 }

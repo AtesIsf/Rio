@@ -24,7 +24,7 @@ void kernel_vm_init() {
     if (kernel_page_table == nullptr) {
         panic("panic: kernel page table kalloc error");
     }
-    memset((byte *) kernel_page_table, 0, PAGE_SIZE);
+    kmemset((byte *) kernel_page_table, 0, PAGE_SIZE);
 
     /* qemu virt devices */
     status_code result = OK;
@@ -139,7 +139,7 @@ status_code map_pages(pte_t *page_table_root, byte *src, byte *dest,
 
 pte_t *pte_walk(pte_t *page_table_root, byte *virt_addr, bool alloc) {
     if (page_table_root == nullptr || virt_addr == nullptr 
-            || (uint64) virt_addr > MAX_VIRT_ADDR) {
+            || (uint64) virt_addr >= MAX_VIRT_ADDR) {
         return nullptr;
     }
 
@@ -153,7 +153,8 @@ pte_t *pte_walk(pte_t *page_table_root, byte *virt_addr, bool alloc) {
             page_table_root = (pte_t *) kalloc(1);
             if (page_table_root == nullptr) return nullptr;
 
-            status_code result = memset((byte *) page_table_root, 0, PAGE_SIZE);
+            status_code result =
+                kmemset((byte *) page_table_root, 0, PAGE_SIZE);
             if (result == ERR) return nullptr;
             *pte = PA2PTE(page_table_root) | PTE_V;
         }

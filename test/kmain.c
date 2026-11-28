@@ -11,12 +11,14 @@ process kmain(void) {
     kputs("\n[+] Subsystem Unit Tests:");
 
     test_lobby();
+    test_klib();
     test_interrupt();
     test_process();
     test_scheduler();
     test_semaphore();
     test_timed();
     test_memory();
+    test_vm();
     test_kprint(); // last: may crash the kernel
 
     kputs("\n============================");

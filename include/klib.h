@@ -3,6 +3,6 @@
 
 #include <ktypes.h>
 
-status_code memset(byte *dest, byte val, uint64 len);
+status_code kmemset(byte *dest, byte val, uint64 len);
 
 #endif
