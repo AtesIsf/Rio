@@ -5,6 +5,7 @@ void *interrupt_handler_table[IRQ_COUNT];
 void interrupts_init() {
     interrupt_handler_table[0] = nullptr;
     interrupt_handler_table[1] = handler_clock;
+    interrupt_handler_table[2] = handler_page_fault;
     write_stvec((uint64) dispatch_interrupt);
     write_sstatus(SSTATUS_SIE);
 }
@@ -48,6 +49,9 @@ irq get_irq() {
 
     case SCAUSE_SOFTWARE: // unused for now
         break;
+    case SCAUSE_PG_FAULT: // unused for now
+        code = IRQ_PG_FAULT;
+        break;
     default:
         kprintf("[Warning] Unknown scause value: %x\n", cause);
     }
@@ -69,6 +73,11 @@ status_code handler_clock() {
         yield();
     }
 
+    return OK;
+}
+
+status_code handler_page_fault() {
+    // TODO: whatever
     return OK;
 }
 

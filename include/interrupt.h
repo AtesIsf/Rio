@@ -14,8 +14,9 @@
 // TODO: Add more later
 /* IRQ DEFINITIONS */
 typedef enum irq : uint8 {
-    IRQ_UNKNOWN = 0,
-    IRQ_CLOCK   = 1,
+    IRQ_UNKNOWN     = 0,
+    IRQ_CLOCK       = 1,
+    IRQ_PG_FAULT    = 2,
     IRQ_COUNT, // keep last: sizes the handler table
 } irq;
 
@@ -36,6 +37,8 @@ status_code handle_interrupt();
 irq get_irq();
 
 status_code handler_clock();
+
+status_code handler_page_fault();
 
 /* inline functions from here */
 

@@ -89,6 +89,7 @@ struct Context {
 #define SCAUSE_SOFTWARE (0x8000000000000001L) // Supervisor software interrupt
 #define SCAUSE_TIMER    (0x8000000000000005L) // Supervisor timer interrupt
 #define SCAUSE_EXTERNAL (0x8000000000000009L) // Supervisor external interrupt
+#define SCAUSE_PG_FAULT (15L) // Supervisor external interrupt
 
 static inline uint64 read_stvec() {
     uint64 val;
