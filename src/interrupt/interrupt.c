@@ -53,7 +53,8 @@ irq get_irq() {
         code = IRQ_PG_FAULT;
         break;
     default:
-        kprintf("[Warning] Unknown scause value: %x\n", cause);
+        kprintf("\n[Warning] Unknown scause value: %x\n", cause);
+        panic("get_irq(): unknown scause");
     }
 
     return code;

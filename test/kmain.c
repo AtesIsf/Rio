@@ -3,11 +3,6 @@
 int32 g_pass = 0;
 int32 g_fail = 0;
 
-// QEMU finisher: exit status is value >> 16, so failure needs bit 16 set
-#define FINISHER ((volatile uint32 *) 0x100000)
-#define FINISH_PASS (0x5555)
-#define FINISH_FAIL ((1 << 16) | 0x3333)
-
 process kmain(void) {
     kputs("============================");
     kputs("    RIO KERNEL TEST SUITE   ");

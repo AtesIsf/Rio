@@ -50,6 +50,13 @@ void kernel_vm_init() {
         panic("kernel_vm_init: failed to map plic");
     }
 
+    // qemu exit
+    result = map_pages(kernel_page_table, (byte *) FINISHER, (byte *) FINISHER,
+          1, PTE_R | PTE_W);
+    if (result == ERR) {
+        panic("kernel_vm_init: failed to map qemu finisher");
+    }
+
     /* kernel things */
 
     // kernel text => executable & read

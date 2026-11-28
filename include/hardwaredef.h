@@ -27,6 +27,10 @@
 #define PLIC_SPRIORITY(hart) ((uint64) PLIC + 0x201000 + (hart) * 0x2000)
 #define PLIC_SCLAIM(hart)    ((uint64) PLIC + 0x201004 + (hart) * 0x2000)
 
+// QEMU finisher: exit status is value >> 16, so failure needs bit 16 set
+#define FINISHER ((volatile uint32 *) 0x100000)
+#define FINISH_PASS (0x5555)
+#define FINISH_FAIL ((1 << 16) | 0x3333)
 
 // on first run, interrupts are enabled and the function returns to s-mode
 #define INITIAL_PROCESS_SSTATUS (SSTATUS_SIE | SSTATUS_SPP)
