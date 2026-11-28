@@ -1,7 +1,7 @@
 #ifndef SLEEP_H
 #define SLEEP_H
 
-#include "process.h"
+#include <process.h>
 
 syscall sleep(uint64 ms);
 
