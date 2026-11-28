@@ -40,6 +40,8 @@
 #define PAGE_ROUND_UP(x)  (((x) + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1))
 #define PAGE_ROUND_DOWN(x) (((x)) & ~(PAGE_SIZE - 1))
 
+extern byte *usable_pages_start;
+
 /* functions */
 
 void mem_init();

@@ -8,6 +8,7 @@
 #include <delta.h>
 #include <hardwaredef.h>
 #include <interrupt.h>
+#include <klib.h>
 #include <kmain.h>
 #include <kprint.h>
 #include <ktypes.h>

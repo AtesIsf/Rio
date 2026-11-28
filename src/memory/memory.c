@@ -9,7 +9,7 @@ static uint64 n_pages; // number of pages in the RAM
 static byte *pages_start; // where the pages start from
 
 // the first page after all the metadata pages end
-static byte *usable_pages_start;
+byte *usable_pages_start;
 
 /* static inline bitmap helper functions */
 

@@ -5,8 +5,6 @@
 
 #include <stdarg.h>
 
-#define UART_ADDR ((unsigned char *) 0x10000000) 
-
 status_code kputc(char c);
 
 status_code kprint(const char *str);

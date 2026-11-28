@@ -12,6 +12,22 @@
 #define PAGE_SIZE (4096) // assume 4 KiB page size
 #define RAM_SIZE (128 * 1024 * 1024) // QEMU gives 128 MB RAM by default
 
+/* qemu virt devices */
+
+#define UART_ADDR ((byte *) 0x10000000) 
+#define UART_IRQ (10)
+
+#define VIRTIO_ADDR ((byte *) 0x10001000)
+#define VIRTIO_IRQ (1)
+
+#define PLIC_ADDR            ((byte *) 0x0c000000L)
+#define PLIC_PRIORITY        ((uint64) PLIC + 0x0)
+#define PLIC_PENDING         ((uint64) PLIC + 0x1000)
+#define PLIC_SENABLE(hart)   ((uint64) PLIC + 0x2080 + (hart) * 0x100)
+#define PLIC_SPRIORITY(hart) ((uint64) PLIC + 0x201000 + (hart) * 0x2000)
+#define PLIC_SCLAIM(hart)    ((uint64) PLIC + 0x201004 + (hart) * 0x2000)
+
+
 // on first run, interrupts are enabled and the function returns to s-mode
 #define INITIAL_PROCESS_SSTATUS (SSTATUS_SIE | SSTATUS_SPP)
 
